@@ -123,8 +123,8 @@ normal.fdccLLH2 = function(pars, arglist)
 	
 	for(i in 1:m){
 		specx = mspec@spec[[i]]
-		setfixed(specx) = as.list(mpars[which(midx[,i]==1), i])
-		flt = ugarchfilter(spec = specx, data = data[,i], out.sample = n.start)
+		setfixed(specx) = as.list(mpars[which(eidx[,i]==1), i])
+		flt = ugarchfilter(spec = specx, data = xts(data[,i], arglist$index[1:nrow(data)]), out.sample = n.start, realizedVol = arglist$realizedVol[1:nrow(data),i])
 		H[, i] = sigma(flt)
 		resids[,i] = residuals(flt)
 	}
@@ -215,8 +215,8 @@ normalfilter.fdccLLH2 = function(pars, arglist)
 	
 	for(i in 1:m){
 		specx = mspec@spec[[i]]
-		setfixed(specx) = as.list(mpars[which(midx[,i]==1), i])
-		flt = ugarchfilter(spec = specx, data = data[,i], out.sample = n.start, n.old = n.old)
+		setfixed(specx) = as.list(mpars[which(eidx[,i]==1), i])
+		flt = ugarchfilter(spec = specx, data = xts(data[,i], arglist$index[1:nrow(data)]), out.sample = n.start, realizedVol = arglist$realizedVol[1:nrow(data),i])
 		H[, i] = sigma(flt)
 		resids[,i] = residuals(flt)
 	}

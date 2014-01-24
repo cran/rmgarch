@@ -10,7 +10,7 @@ Method for creating a Copula-GARCH filter object.
 \usage{
 cgarchfilter(spec, data, out.sample = 0, filter.control = list(n.old = NULL), 
 spd.control = list(lower = 0.1, upper = 0.9, type = "pwm", kernel = "epanech"), 
-cluster = NULL, varcoef = NULL, ...)  
+cluster = NULL, varcoef = NULL, realizedVol = NULL, ...)  
 }
 \arguments{
   	\item{spec}{ A \code{\linkS4class{cGARCHspec}} object created by 
@@ -30,6 +30,7 @@ cluster = NULL, varcoef = NULL, ...)
 	\item{varcoef}{ If a VAR model was chosen, then this is the VAR coefficient 
 	matrix which must be supplied. No checks are done on its dimension or 
 	correctness so it is up to the user to perform the appropriate checks.}
+	\item{realizedVol}{ Required xts matrix for the realGARCH model.}
 	\item{...}{ . }
 }
 \value{

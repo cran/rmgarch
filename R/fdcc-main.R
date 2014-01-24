@@ -76,7 +76,7 @@
 		if(is.null(VAR.opt$lag)) modelinc[1] = 1 else modelinc[1] = as.integer( VAR.opt$lag )
 		if(!is.null(VAR.opt$external.regressors)){
 			if(!is.matrix(VAR.opt$external.regressors)) stop("\nexternal.regressors must be a matrix.")
-			modelinc[2] = dim(VAR.opt$external.regressors)[1]
+			modelinc[2] = dim(VAR.opt$external.regressors)[2]
 			modeldata$mexdata = VAR.opt$external.regressors
 		} else{
 			modeldata$mexdata = NULL
@@ -344,7 +344,8 @@
 .fdccfit = function(spec, data, out.sample = 0, solver = "solnp", 
 		solver.control = list(), fit.control = list(eval.se = TRUE, 
 				stationarity = TRUE, scale = FALSE), 
-		cluster = NULL, fit = NULL, VAR.fit = NULL, verbose = FALSE, ...)
+		cluster = NULL, fit = NULL, VAR.fit = NULL, verbose = FALSE, 
+		realizedVol = NULL, ...)
 {
 	tic = Sys.time()
 	.eps = .Machine$double.eps
@@ -434,9 +435,9 @@
 		model$residuals = res = residuals(fitlist)
 		model$sigma = sig = sigma(fitlist)
 	} else{		
-		fitlist = multifit(multispec = mspec, data = zdata, out.sample = n.start, 
+		fitlist = multifit(multispec = mspec, data = xts(zdata, index), out.sample = n.start, 
 				solver = garch.solver, solver.control = solver.control, 
-				fit.control = ufit.control, cluster = cluster)
+				fit.control = ufit.control, cluster = cluster, realizedVol = realizedVol)
 		converge = sapply(fitlist@fit, FUN = function(x) x@fit$convergence)
 		if( any( converge == 1 ) ){
 			pr = which(converge != 1)
@@ -467,7 +468,7 @@
 	mpars = midx*0
 	# This is the estimated parameter index
 	eidx = .estindfn(midx, mspec, model$pars)
-	unipars = sapply(fitlist@fit, FUN = function(x) x@fit$ipars[x@fit$ipars[,3]==1,1])
+	unipars = lapply(fitlist@fit, FUN = function(x) x@fit$ipars[x@fit$ipars[,3]==1,1])
 	if(is.list(unipars)){
 		for(i in 1:length(unipars)){
 			uninames = names(unipars[[i]])
@@ -503,6 +504,8 @@
 	arglist$m = m
 	arglist$T = T
 	arglist$data = zdata
+	arglist$index = index
+	arglist$realizedVol = realizedVol
 	arglist$model = model
 	arglist$fitlist = fitlist
 	arglist$umodel = umodel
@@ -527,7 +530,8 @@
 				warning("\nfdccfit-->warning: all parameters fixed...returning dccfilter object instead\n")
 				xspex = spec
 				for(i in 1:m) xspex@umodel$fixed.pars[[i]] = as.list(fitlist@fit[[i]]@model$pars[fitlist@fit[[i]]@model$pars[,3]==1,1])
-				return(.fdccfilter(spec = xspex, data = xts(data, index), out.sample = out.sample, cluster = cluster, VAR.fit = VAR.fit))
+				return(.fdccfilter(spec = xspex, data = xts(data, index), out.sample = out.sample, cluster = cluster, VAR.fit = VAR.fit,
+								realizedVol = realizedVol))
 			} else{
 				# if all parameters are fixed but we require standard errors, we
 				# skip the solver
@@ -618,6 +622,7 @@
 	model$eidx = eidx
 	model$umodel = umodel
 	fit$Qbar = Qbar
+	fit$realizedVol = realizedVol
 	ans = new("DCCfit",
 			mfit = fit,
 			model = model)
@@ -648,7 +653,7 @@ getfdccpars = function(pars, model){
 }
 
 .fdccfilter = function(spec, data, out.sample = 0, filter.control = list(n.old = NULL), 
-		cluster = NULL, varcoef = NULL, ...)
+		cluster = NULL, varcoef = NULL, realizedVol = NULL, ...)
 {
 	tic = Sys.time()
 	model = spec@model
@@ -711,8 +716,9 @@ getfdccpars = function(pars, model){
 			umodel$modeldata$mexdata, umodel$modeldata$vexdata, umodel$start.pars, 
 			umodel$fixed.pars, NULL)
 	
-	filterlist = multifilter(multifitORspec = mspec, data = as.data.frame(zdata), 
-			out.sample = out.sample, cluster = cluster, n.old = n.old)
+	filterlist = multifilter(multifitORspec = mspec, data = xts(zdata, index[1:nrow(zdata)]), 
+			out.sample = out.sample, cluster = cluster, n.old = n.old,
+			realizedVol = realizedVol)
 	
 	if(spec@model$modelinc[1]>0) model$mu = mu else model$mu = fitted(filterlist)
 	model$residuals = res = residuals(filterlist)
@@ -767,6 +773,8 @@ getfdccpars = function(pars, model){
 	arglist$n.old = n.old
 	arglist$dcc.old = dcc.old
 	arglist$data = zdata
+	arglist$index = index
+	arglist$realizedVol = realizedVol
 	arglist$model = model
 	arglist$filterlist = filterlist
 	arglist$umodel = umodel
@@ -797,6 +805,7 @@ getfdccpars = function(pars, model){
 	model$eidx = eidx
 	model$umodel = umodel	
 	filt$Qbar = Qbar
+	filt$realizedVol = realizedVol
 	filt$timer = Sys.time() - tic
 	ans = new("DCCfilter",
 			mfilter = filt,
@@ -897,8 +906,8 @@ getfdccpars = function(pars, model){
 	mspec = .makemultispec(umodel$modelinc, umodel$modeldesc$vmodel, umodel$modeldesc$vsubmodel, 
 			umodel$modeldata$mexdata, umodel$modeldata$vexdata, umodel$start.pars, 
 			fpars, NULL)
-	filterlist = multifilter(multifitORspec = mspec, data = zdata, out.sample = 0, 
-			n.old = fit@model$modeldata$T, cluster = cluster)
+	filterlist = multifilter(multifitORspec = mspec, data = xts(zdata, fit@model$modeldata$index[1:nrow(zdata)]), out.sample = 0, 
+			n.old = fit@model$modeldata$T, cluster = cluster, realizedVol = fit@mfit$realizedVol)
 	
 	# all.equal(head(sigma(filterlist)), head(fit@model$sigma) )
 	n.roll = n.roll + 1
@@ -907,9 +916,9 @@ getfdccpars = function(pars, model){
 	mo = max(modelinc[4:5])
 	# we augmented n.roll before, now subtract
 	# forclist = multiforecast(multifitORspec = fitlist, n.ahead = n.ahead, n.roll = n.roll - 1)
-	forclist = multiforecast(multifitORspec = mspec, data = zdata, n.ahead = n.ahead, 
+	forclist = multiforecast(multifitORspec = mspec, data = xts(zdata, fit@model$modeldata$index[1:nrow(zdata)]), n.ahead = n.ahead, 
 			out.sample = ns, n.roll = n.roll - 1, external.forecasts = external.forecasts, 
-			cluster = cluster, ...)
+			cluster = cluster, realizedVol = fit@mfit$realizedVol, ...)
 	# ToDo:
 	if(modelinc[1] == 0){
 		mu = array(NA, dim=c(n.ahead, m, n.roll))
@@ -1059,7 +1068,7 @@ getfdccpars = function(pars, model){
 		startMethod = c("unconditional", "sample"), presigma = NULL, 
 		preresiduals = NULL, prereturns = NULL, preQ = NULL, preZ = NULL, 
 		Qbar = NULL, rseed = NULL, mexsimdata = NULL, 
-		vexsimdata = NULL, cluster = NULL, VAR.fit = NULL, ...)
+		vexsimdata = NULL, cluster = NULL, VAR.fit = NULL, prerealized = NULL, ...)
 {
 	fit = fitORspec
 	T = fit@model$modeldata$T
@@ -1167,6 +1176,26 @@ getfdccpars = function(pars, model){
 		}
 	}
 	
+	if(fit@model$umodel$modeldesc$vmodel[1]=="realGARCH"){
+		if( !is.null(prerealized) ){
+			if( !is.matrix(prerealized) ) 
+				stop("\ndccsim-->error: prerealized must be a matrix.")
+			if( dim(prerealized)[2] != m ) 
+				stop("\ndccsim-->error: wrong column dimension for prerealized.")
+			if( dim(prerealized)[1] != mg ) 
+				stop(paste("\ndccsim-->error: wrong row dimension for prerealized (need ", mg, " rows.", sep = ""))
+		} else{
+			if(startMethod == "sample"){
+				mx = max(sapply(mspec@spec, FUN = function(x) x@model$maxOrder))
+				prerealized = matrix(NA, ncol = m, nrow = mx)
+				tmp = tail(fit@mfit$realizedVol[1:T,], mx)
+				for(i in 1:mx) prerealized[i,] = tmp[i,]
+			}
+		}
+	} else{
+		mx = max(sapply(mspec@spec, FUN = function(x) x@model$maxOrder))
+		prerealized = matrix(NA, ncol = m, nrow = mx)
+	}
 	# switch distributions
 	if(fit@model$modeldesc$distribution == "mvnorm"){
 		if(length(rseed) == 1){
@@ -1184,27 +1213,27 @@ getfdccpars = function(pars, model){
 	} else if(fit@model$modeldesc$distribution == "mvlaplace"){
 		if(length(rseed) == 1){
 			set.seed( rseed )
-			tmp = matrix(rugarch:::rged(m * (n.sim + n.start) * m.sim, 0, 1, nu = 1), ncol = m, nrow = n.sim+n.start)
+			tmp = matrix(rugarch:::rged(m * (n.sim + n.start) * m.sim, 0, 1, shape = 1), ncol = m, nrow = n.sim+n.start)
 			z = array(NA,  dim = c(n.sim + n.start + mo, m, m.sim))
 			for(i in 1:m.sim) z[,,i] = rbind(preZ, tmp)
 		} else{
 			z = array(NA, dim = c(n.sim + n.start + mo, m, m.sim))
 			for(i in 1:m.sim){
 				set.seed( rseed[i] )
-				z[,,i] = rbind(preZ, matrix(rugarch:::rged(m * (n.sim + n.start), 0, 1, nu = 1), nrow = n.sim + n.start, ncol = m))
+				z[,,i] = rbind(preZ, matrix(rugarch:::rged(m * (n.sim + n.start), 0, 1, shape = 1), nrow = n.sim + n.start, ncol = m))
 			}
 		}
 	} else{
 		if(length(rseed) == 1){
 			set.seed( rseed )
-			tmp = matrix(rugarch:::rstd(m * (n.sim + n.start) * m.sim, 0, 1, nu = rshape(fit)), ncol = m, nrow = n.sim+n.start)
+			tmp = matrix(rugarch:::rstd(m * (n.sim + n.start) * m.sim, 0, 1, shape = rshape(fit)), ncol = m, nrow = n.sim+n.start)
 			z = array(NA,  dim = c(n.sim + n.start + mo, m, m.sim))
 			for(i in 1:m.sim) z[,,i] = rbind(preZ, tmp)
 		} else{
 			z = array(NA, dim = c(n.sim + n.start + mo, m, m.sim))
 			for(i in 1:m.sim){
 				set.seed( rseed[i] )
-				z[,,i] = rbind(preZ, matrix(rugarch:::rstd(m * (n.sim + n.start), 0, 1, nu = rshape(fit)), nrow = n.sim + n.start, ncol = m))
+				z[,,i] = rbind(preZ, matrix(rugarch:::rstd(m * (n.sim + n.start), 0, 1, shape = rshape(fit)), nrow = n.sim + n.start, ncol = m))
 			}
 		}
 	}
@@ -1227,9 +1256,9 @@ getfdccpars = function(pars, model){
 		clusterEvalQ(cluster, require(rmgarch))
 		clusterExport(cluster, c("model", "z", "A", "B", "C", 
 						"preQ", "Rbar", "Qbar", "mo", "n.sim", "n.start", "m", 
-						"rseed"), envir = environment())
+						"rseed",".fdccsimf"), envir = environment())
 		mtmp = parLapply(cluster, as.list(1:m.sim), fun = function(j){
-					rmgarch:::.fdccsimf(model, Z = z[,,j], A = A, B = B, C = C, 
+					.fdccsimf(model, Z = z[,,j], A = A, B = B, C = C, 
 							Qbar = Qbar, preQ = preQ, Rbar = Rbar, mo = mo, 
 							n.sim, n.start, m, rseed[j])
 				})
@@ -1241,7 +1270,7 @@ getfdccpars = function(pars, model){
 		for(i in 1:m) simZ[[i]] = sapply(mtmp, FUN = function(x) x$Z[,i])			
 		clusterExport(cluster, c("fit", "n.sim", "n.start", "m.sim", 
 						"startMethod", "simZ", "presigma", "preresiduals", 
-						"prereturns", "mexsimdata", "vexsimdata"), 
+						"prereturns", "mexsimdata", "vexsimdata","prerealized"), 
 				envir = environment())
 		xtmp = parLapply(cluster, as.list(1:m), fun = function(j){
 					maxx = mspec@spec[[j]]@model$maxOrder;
@@ -1251,7 +1280,7 @@ getfdccpars = function(pars, model){
 							preresiduals = if( is.null(preresiduals) ) NA else tail(preresiduals[,j], maxx), 
 							prereturns = if( is.null(prereturns) | model$modelinc[1]>0 ) NA else tail(prereturns[,j], maxx),
 							mexsimdata = if( model$modelinc[1]==0 ) mexsimdata[[j]] else NULL, 
-							vexsimdata = vexsimdata[[j]] );
+							vexsimdata = vexsimdata[[j]], prerealized = tail(prerealized[,j], maxx));
 					h = matrix(tail(htmp@path$sigmaSim^2, n.sim), nrow = n.sim);
 					x = matrix(htmp@path$seriesSim,  nrow = n.sim + n.start);
 					return(list(h = h, x = x))
@@ -1278,7 +1307,7 @@ getfdccpars = function(pars, model){
 							preresiduals = if( is.null(preresiduals) ) NA else tail(preresiduals[,j], maxx), 
 							prereturns = if( is.null(prereturns) | model$modelinc[1]>0 ) NA else tail(prereturns[,j], maxx),
 							mexsimdata = if( model$modelinc[1]==0 ) mexsimdata[[j]] else NULL, 
-							vexsimdata = vexsimdata[[j]] );
+							vexsimdata = vexsimdata[[j]], prerealized = tail(prerealized[,j], maxx));
 					h = matrix(tail(htmp@path$sigmaSim^2, n.sim), nrow = n.sim);
 					x = matrix(htmp@path$seriesSim,  nrow = n.sim + n.start);
 					return(list(h = h, x = x))})
@@ -1340,7 +1369,8 @@ getfdccpars = function(pars, model){
 		startMethod = c("unconditional", "sample"), presigma = NULL, 
 		preresiduals = NULL, prereturns = NULL, preQ = NULL, preZ = NULL, 
 		Qbar = NULL, rseed = NULL, mexsimdata = NULL, 
-		vexsimdata = NULL, cluster = NULL, VAR.fit = NULL, ...)
+		vexsimdata = NULL, cluster = NULL, VAR.fit = NULL, 
+		prerealized = NULL, ...)
 {
 	spec = fitORspec
 	startMethod = startMethod[1]
@@ -1416,6 +1446,19 @@ getfdccpars = function(pars, model){
 			stop(paste("\ndccsim-->error: wrong row dimension for prereturns (need ", mg, " rows.", sep = ""))
 	}
 	
+	if(spec@umodel$modeldesc$vmodel[1]=="realGARCH"){
+		if( !is.null(prerealized) ){
+			if( !is.matrix(prerealized) ) 
+				stop("\ndccsim-->error: prerealized must be a matrix.")
+			if( dim(prerealized)[2] != m ) 
+				stop("\ndccsim-->error: wrong column dimension for prerealized.")
+			if( dim(prerealized)[1] != mg ) 
+				stop(paste("\ndccsim-->error: wrong row dimension for prerealized (need ", mg, " rows.", sep = ""))
+		}
+	} else{
+		prerealized = matrix(NA, ncol = m, nrow = mg)
+	}
+	
 	# we use the GED distribution  with nu = 1 which corresponds to the Laplace case.
 	if(model$modeldesc$distribution == "mvnorm"){
 		if(length(rseed) == 1){
@@ -1433,27 +1476,27 @@ getfdccpars = function(pars, model){
 	} else if(model$modeldesc$distribution == "mvlaplace"){
 		if(length(rseed) == 1){
 			set.seed( rseed )
-			tmp = rugarch:::rged(m * (n.sim + n.start) * m.sim, 0, 1, nu = 1)
+			tmp = rugarch:::rged(m * (n.sim + n.start) * m.sim, 0, 1, shape = 1)
 			z = array(NA,  dim = c(n.sim + n.start + mo, m, m.sim))
 			for(i in 1:m.sim) z[,,i] = rbind(preZ, tmp)
 		} else{
 			z = array(NA, dim = c(n.sim + n.start + mo, m, m.sim))
 			for(i in 1:m.sim){
 				set.seed( rseed[i] )
-				z[,,i] = rbind(preZ, matrix(rugarch:::rged(m * (n.sim + n.start), 0, 1, nu = 1), nrow = n.sim + n.start, ncol = m))
+				z[,,i] = rbind(preZ, matrix(rugarch:::rged(m * (n.sim + n.start), 0, 1, shape = 1), nrow = n.sim + n.start, ncol = m))
 			}
 		}
 	} else{
 		if(length(rseed) == 1){
 			set.seed( rseed )
-			tmp = rugarch:::rstd(m * (n.sim + n.start) * m.sim, 0, 1, nu = model$mpars["mshape",1])
+			tmp = rugarch:::rstd(m * (n.sim + n.start) * m.sim, 0, 1, shape = model$mpars["mshape",1])
 			z = array(NA,  dim = c(n.sim + n.start + mo, m, m.sim))
 			for(i in 1:m.sim) z[,,i] = rbind(preZ, tmp)
 		} else{
 			z = array(NA, dim = c(n.sim + n.start + mo, m, m.sim))
 			for(i in 1:m.sim){
 				set.seed( rseed[i] )
-				z[,,i] = rbind(preZ, matrix(rugarch:::rstd(m * (n.sim + n.start), 0, 1, nu = model$mpars["mshape",1]), nrow = n.sim + n.start, ncol = m))
+				z[,,i] = rbind(preZ, matrix(rugarch:::rstd(m * (n.sim + n.start), 0, 1, shape = model$mpars["mshape",1]), nrow = n.sim + n.start, ncol = m))
 			}
 		}
 	}
@@ -1478,9 +1521,9 @@ getfdccpars = function(pars, model){
 		clusterEvalQ(cluster, require(rmgarch))
 		clusterExport(cluster, c("model", "z", "A", "B", "C", "preQ", 
 						"Rbar", "Qbar", "mo", "n.sim", "n.start", "m", 
-						"rseed"), envir = environment())
+						"rseed",".fdccsimf"), envir = environment())
 		mtmp = parLapply(cluster, as.list(1:m.sim), fun = function(j){
-					rmgarch:::.fdccsimf(model, Z = z[,,j], A = A, B = B, C = C, 
+					.fdccsimf(model, Z = z[,,j], A = A, B = B, C = C, 
 							Qbar = Qbar, preQ = preQ, Rbar = Rbar, mo = mo, 
 							n.sim, n.start, m, rseed[j])
 				})
@@ -1493,7 +1536,7 @@ getfdccpars = function(pars, model){
 		for(i in 1:m) simZ[[i]] = sapply(mtmp, FUN = function(x) x$Z[,i])
 		clusterExport(cluster, c("mspec", "n.sim", "n.start", "m.sim", 
 						"startMethod", "simZ", "presigma", "preresiduals", 
-						"prereturns", "mexsimdata", "vexsimdata"), 
+						"prereturns", "mexsimdata", "vexsimdata","prerealized"), 
 				envir = environment())
 		xtmp = parLapply(cluster, as.list(1:m), fun = function(j){
 					maxx = mspec@spec[[j]]@model$maxOrder;
@@ -1503,7 +1546,7 @@ getfdccpars = function(pars, model){
 							preresiduals = if( is.null(preresiduals) ) NA else tail(preresiduals[,j], maxx), 
 							prereturns = if( is.null(prereturns) | model$modelinc[1]>0 ) NA else tail(prereturns[,j], maxx),
 							mexsimdata = if( model$modelinc[1]==0 ) mexsimdata[[j]] else NULL, 
-							vexsimdata = vexsimdata[[j]] )
+							vexsimdata = vexsimdata[[j]], prerealized = tail(prerealized[,j], maxx))
 					h = matrix(tail(htmp@path$sigmaSim^2, n.sim), nrow = n.sim)
 					x = matrix(htmp@path$seriesSim,  nrow = n.sim + n.start)
 					xres = matrix(htmp@path$residSim,  nrow = n.sim + n.start)
@@ -1530,7 +1573,8 @@ getfdccpars = function(pars, model){
 							presigma = if( is.null(presigma) ) NA else tail(presigma[,j], maxx), 
 							preresiduals = if( is.null(preresiduals) ) NA else tail(preresiduals[,j], maxx), 
 							prereturns = if( is.null(prereturns) | model$modelinc[1]>0 ) NA else tail(prereturns[,j], maxx),
-							mexsimdata = if( model$modelinc[1]==0 ) mexsimdata[[j]] else NULL, vexsimdata = vexsimdata[[j]] );
+							mexsimdata = if( model$modelinc[1]==0 ) mexsimdata[[j]] else NULL, vexsimdata = vexsimdata[[j]],
+							prerealized = tail(prerealized[,j], maxx));
 					h = matrix(tail(htmp@path$sigmaSim^2, n.sim), nrow = n.sim);
 					x = matrix(htmp@path$seriesSim,  nrow = n.sim + n.start);
 					xres = matrix(htmp@path$residSim,  nrow = n.sim + n.start);
@@ -1655,17 +1699,18 @@ getfdccpars = function(pars, model){
 	# skew
 	# shape
 	# ghlambda
+	# xi
 	# fdccC
 	# fdccA
 	# fdccB
 	# mshape
 	# mskew
 	
-	vecmax = rep(0, 18)
-	names(vecmax) = rownames(umodel$modelinc[1:18,])
+	vecmax = rep(0, 19)
+	names(vecmax) = rownames(umodel$modelinc[1:19,])
 	vecmax = apply(umodel$modelinc, 1, FUN = function(x) max(x) )
 	maxOrder = apply(umodel$modelinc, 2, FUN = function(x) max(c(x[2], x[3], x[8], x[9])))
-	sumv = 18 + sum(pmax(1, vecmax[c(2,3,6,8,9,10,11,12,13,16)])) - 10
+	sumv = 19 + sum(pmax(1, vecmax[c(2,3,6,8,9,10,11,12,13,15,16)])) - 11
 	tmpmat = matrix(0, ncol = m+1, nrow = sumv)
 	nx = 0
 	pnames = NULL
@@ -1811,6 +1856,12 @@ getfdccpars = function(pars, model){
 	nx = nx + max(1, vecmax[18])
 	pnames = c(pnames, "ghlambda")
 		
+	if(vecmax[19]>0){
+		tmpmat[nx+1, 1:m] = umodel$modelinc[19, ]
+	}
+	nx = nx + max(1, vecmax[19])
+	pnames = c(pnames, "xi")
+	
 	sumdcc = max(1, (modelinc[4]*modelinc[3]))+max(1, (modelinc[5]*modelinc[3])) + 
 			max(1, modelinc[6]) + max(1, modelinc[6])
 	

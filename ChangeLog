@@ -1,3 +1,52 @@
+2014-01-25 Alexios Ghalanos <alexios@4dscape.com>
+	* DESCRIPTION (Version): New version is 1.2-5.
+	* Patched to work with recent changes to Rcpp.
+	
+2014-01-05 Alexios Ghalanos <alexios@4dscape.com>
+	* DESCRIPTION (Version): New version is 1.2-4.
+	* Implemented very fast flattened tensor indexing for
+	the gogarch higher co-moment matrices using analytic
+	relationship for coordinates of pairs {i=j,k=l}, leading
+	to a 10x speed increase.
+	* Huge efficiency gains (memory management) from using 
+	the klin functionality for kronecker multiplication of 
+	the very large co-moment matrices.
+	* Fix to DCC estimation method for case of different univariate
+	specifications (reported by Suzanna Linn).
+	* Created and exported the betacovar, betacoskew and betacokurt 
+	methods for higher moment CAPM beta calculation (discussed in 
+	blog post).
+	* Enanced DCC based models to accept the newly released realGARCH model
+	from rugarch (additional argument realizedVol required).
+	
+2013-09-02 Alexios Ghalanos <alexios@4dscape.com>
+	* DESCRIPTION (Version): New version is 1.2-3.
+	* replaced estimation of Kendall's tau with cor.fk function of pcaPP
+	package which is very fast (affects static mvt copula).
+	* Added some pro-active garbage collection in the simulation code since
+	memory usage was building up without being released (fragmentation). Also 
+	replaced lapply with normal loop for better memory management.
+	* Fix to cgarchspec and dccspec in the presence of external regressors (had 
+	previously saved the wrong dimension).
+	
+2013-05-26 Alexios Ghalanos <alexios@4dscape.com>
+	* DESCRIPTION (Version): New version is 1.2-2.
+	* Fix to cgarchsim in presence of variance targeting in the univariate
+	models (exited with failure code).
+	* Fixes to some methods to comply with rugarch 1.2-5 (now required as minimum
+	version)
+
+2013-04-25 Alexios Ghalanos <alexios@4dscape.com>
+	* DESCRIPTION (Version): New version is 1.2-1.
+	* cordist function added to visualize dynamic correlation distances.
+	* Fixed problem of using variance targeting in the multivariate models.
+	* Fixed problem in dccroll and gogarchroll not saving the correct
+	forecast length in the output object.
+	* Fix to gogarch extractor methods when using PCA dimensionality reduction
+	prior to ICA (estimation ok, failed on use of rcor, rcov and related methods).
+	* Some more functions in gogarch ported to Rcpp for speed and memory management
+	(related to large dimensional tensors and kronecker product).
+
 2013-04-10  Alexios Ghalanos <alexios@4dscape.com>
 	* DESCRIPTION (Version): New version is 1.2-0.
 	* Version bump and update for use with rugarch 1.2-2 and R 3.0.0

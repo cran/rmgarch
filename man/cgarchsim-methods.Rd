@@ -11,7 +11,8 @@ Method for creating a Copula-GARCH simulation object.
 cgarchsim(fit, n.sim = 1000, n.start = 0, m.sim = 1, 
 startMethod = c("unconditional", "sample"), presigma = NULL, preresiduals = NULL, 
 prereturns = NULL, preR = NULL, preQ = NULL, preZ = NULL, rseed = NULL, 
-mexsimdata = NULL, vexsimdata = NULL, cluster = NULL, ...)
+mexsimdata = NULL, vexsimdata = NULL, cluster = NULL, only.density = FALSE, 
+prerealized = NULL, ...)
 }
 \arguments{
   	\item{fit}{ 
@@ -53,6 +54,12 @@ mexsimdata = NULL, vexsimdata = NULL, cluster = NULL, ...)
   	\item{cluster}{ A cluster object created by calling \code{makeCluster} from 
   	the parallel package. If it is not NULL, then this will be used for parallel 
   	estimation (remember to stop the cluster on completion).}
+  	\item{only.density}{Whether to return only the simulated returns (discrete
+  	time approximation to the multivariate density). This is sometimes useful
+  	in order to control memory management for large simulations not requiring
+  	any other information.}
+  	\item{prerealized}{Allows the starting realized volatility values to be provided 
+	by the user for the univariate GARCH dynamics.}
   	\item{...}{.}
 }
 \value{

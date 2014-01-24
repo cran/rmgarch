@@ -398,7 +398,7 @@
 					variance.model = list(model = model$umodel$vmodel, garchOrder = model$umodel$garchOrder, 
 							submodel = model$umodel$vsubmodel, variance.targeting = FALSE), 
 					distribution.model = model$umodel$distribution, fixed.pars = as.list(fit@mfit$garchcoef[,i]))
-		clusterEvalQ(cluster, require(rugarch))
+		clusterEvalQ(cluster, require("rugarch"))
 		clusterExport(cluster, c("presig", "factor.preres", "sm", "specx", 
 						"n.sim", "n.start", "m.sim", "startMethod", "xseed"), 
 				envir = environment())
@@ -506,6 +506,8 @@
 		if(is.null(forecast.length)) 
 			stop("\ngogarchroll:--> forecast.length amd n.start are both NULL....try again.")
 		n.start = T - forecast.length
+	} else{
+		forecast.length = T - n.start
 	}
 	if(T<=n.start) 
 		stop("\ngogarchroll:--> start cannot be greater than length of data")

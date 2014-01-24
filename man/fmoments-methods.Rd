@@ -35,7 +35,8 @@ returned to the workspace.}
 \item{save.name}{ The name of the file to save the output list.}
 \item{...}{ Additional parameters passed to the model fitting routines. In 
 particular, for the \sQuote{gogarch} model additional parameters are passed to
-the ICA routines.}
+the ICA routines, whereas for the \sQuote{dcc} and \sQuote{cgarch} models 
+this would include the \sQuote{realizedVol} xts matrix for the realGARCH model.}
 }
 \value{
 A \code{\linkS4class{fMoments}} object containing the forecast moments 

@@ -102,9 +102,9 @@ rcopula.gauss = function(n, U, Sigma, ...)
 dcopula.student = function(U, Corr, df, logvalue = FALSE)
 {
 	m = dim(Corr)[2]
-	Z = apply(U, 2, FUN = function(x) qt(p = x , df = df))
+	Z = apply(U, 2, FUN = function(x) rugarch:::qstd(p = x , shape = df))
 	mu = rep(0, m)
-	ans = .dmvt(Z, delta = mu, sigma = Corr, df = df, log = TRUE) - apply(Z, 1, FUN = function(x) sum(dt(x, df = df, log = TRUE)))
+	ans = .dmvt(Z, delta = mu, sigma = Corr, df = df, log = TRUE) - apply(Z, 1, FUN = function(x) sum(rugarch:::dstd(x, shape = df, log = TRUE)))
 	# .Call("dcopulaStudent", Z = Z, m = matrix(0, nrow = 1, ncol = m), sigma = Corr, df = df, dtZ = dt(Z, df = df, log = TRUE), 
 	# PACKAGE = "rmgarch")
 	if( !logvalue ) ans = exp(ans)
@@ -126,7 +126,7 @@ rcopula.student = function(n, U, Corr, df)
 {
 	m = dim(Corr)[2]
 	mu = rep(0, m)
-	ans = pt(.rmvt(n, delta = mu, sigma = Corr, df = df), df = df)
+	ans = rugarch:::pstd(.rmvt(n, delta = mu, sigma = Corr, df = df), shape = df)
 	return ( ans )
 }
 
@@ -167,34 +167,38 @@ rcopula.student = function(n, U, Corr, df)
 			z[,,i] = rbind(preZ, .rmvnorm(n = (n.sim + n.start), mean = rep(0, m), sigma = diag(m)))
 		}
 	}
-	
 	xseed = rseed+1
+	simR = vector(mode = "list", length = m.sim)
+	mtmp = vector(mode="list", length=m.sim)
 	if( !is.null(cluster) ){
 		clusterEvalQ(cluster, require(rmgarch))
 		clusterExport(cluster, c("model", "z", "preQ", "Rbar", "Nbar", 
 						"mo", "n.sim", "n.start", "m", "xseed"), envir = environment())
+		clusterExport(cluster, ".copuladccsimf", envir = environment())
 		mtmp = parLapply(cluster, as.list(1:m.sim), fun = function(j){
-					rmgarch:::.copuladccsimf(model, Z = z[,,j], Qbar = Qbar, 
+					.copuladccsimf(model, Z = z[,,j], Qbar = Qbar, 
 							preQ = preQ, Nbar = Nbar, Rbar = Rbar, mo = mo, 
 							n.sim, n.start, m, rseed[j])
 				})
 	} else{
-		mtmp = lapply(as.list(1:m.sim), FUN = function(j){
-					.copuladccsimf(model, Z = z[,,j], Qbar = Qbar, preQ = preQ, 
-							Nbar = Nbar, Rbar = Rbar, mo = mo, n.sim, n.start, 
-							m, rseed[j])
-				})
+		for(i in 1:m.sim){
+			mtmp[[i]] = .copuladccsimf(model, Z = z[,,i], Qbar = Qbar, preQ = preQ, 
+					Nbar = Nbar, Rbar = Rbar, mo = mo, n.sim, n.start, m, rseed[i])
+		}
 	}
 	simR = lapply(mtmp, FUN = function(x) if(is.matrix(x$R)) array(x$R, dim = c(m, m, n.sim)) else last(x$R, n.sim))
 	Ures = vector(mode = "list", length = m)
 	Usim = array(NA, dim = c(n.sim+n.start, m, m.sim))
 	if(model$modeldesc$distribution  == "mvt"){
-		for(i in 1:m) Ures[[i]] = pt(matrix(sapply(mtmp, FUN = function(x) x$Z[,i]), ncol = m.sim), cf["mshape"])
+		for(i in 1:m) Ures[[i]] = matrix(rugarch:::pstd(sapply(mtmp, FUN = function(x) x$Z[,i]), shape = cf["mshape"]), ncol = m.sim)
 		for(i in 1:m.sim) Usim[,,i] = matrix(sapply(Ures, FUN = function(x) x[-(1:mo),i]), ncol = m)
 	} else{
 		for(i in 1:m) Ures[[i]] = pnorm(matrix(sapply(mtmp, FUN = function(x) x$Z[,i]), ncol = m.sim))
 		for(i in 1:m.sim) Usim[,,i] = matrix(sapply(Ures, FUN = function(x) x[-(1:mo),i]), ncol = m)
-	} 
+	}
+	rm(Ures)
+	rm(mtmp)
+	gc(verbose=FALSE)
 	return(list(Usim = Usim, simR = simR))
 }
 
@@ -209,7 +213,7 @@ rcopula.student = function(n, U, Corr, df)
 		for(i in 1:m.sim){
 			set.seed(rseed[i])
 			tmp = .rmvt(n = nsim, delta = rep(0, m), sigma = Rbar, df = shape) 
-			sim[,,i] = matrix(pt(tmp, df = shape), nrow = nsim, ncol = m)
+			sim[,,i] = matrix(rugarch:::pstd(tmp, shape = shape), nrow = nsim, ncol = m)
 		}
 	} else{
 		for(i in 1:m.sim){
@@ -247,7 +251,9 @@ rcopula.student = function(n, U, Corr, df)
 		R[,,i] = res[[2]][[i]]
 		Q[,,i] = res[[3]][[i]]
 	}
-	ans = list( Q = Q, R = R, Z = res[[3]])
+	Z = res[[3]]
+	ans = list( Q = Q, R = R, Z = Z)
+	rm(res)
 	return( ans )
 }
 #------------------------------------------------------------------------------------

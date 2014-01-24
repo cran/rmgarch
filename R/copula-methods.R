@@ -116,7 +116,7 @@ cgarchfit = function(spec, data, spd.control = list(lower = 0.1, upper = 0.9,
 				type = "pwm", kernel = "epanech"), 
 		fit.control = list(eval.se = TRUE, stationarity = TRUE, scale = FALSE), 
 		solver = "solnp", solver.control = list(), out.sample = 0, cluster = NULL, 
-		fit = NULL, VAR.fit = NULL, ...)
+		fit = NULL, VAR.fit = NULL, realizedVol = NULL, ...)
 {
 	UseMethod("cgarchfit")
 }
@@ -126,7 +126,7 @@ setMethod("cgarchfit", signature(spec = "cGARCHspec"), .cgarchfit)
 
 cgarchfilter = function(spec, data, out.sample = 0, filter.control = list(n.old = NULL), 
 		spd.control = list(lower = 0.1, upper = 0.9, type = "pwm", kernel = "epanech"), 
-		cluster = NULL, varcoef = NULL, ...)
+		cluster = NULL, varcoef = NULL, realizedVol = NULL, ...)
 {
 	UseMethod("cgarchfilter")
 }
@@ -137,7 +137,7 @@ cgarchsim = function(fit, n.sim = 1000, n.start = 0, m.sim = 1,
 		startMethod = c("unconditional", "sample"), presigma = NULL, 
 		preresiduals = NULL, prereturns = NULL, preR = NULL, preQ = NULL,
 		preZ = NULL, rseed = NULL, mexsimdata = NULL, vexsimdata = NULL, 
-		cluster = NULL, ...)
+		cluster = NULL, only.density= FALSE, prerealized = NULL, ...)
 {
 	UseMethod("cgarchsim")
 }

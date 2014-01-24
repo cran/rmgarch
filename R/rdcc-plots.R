@@ -108,7 +108,7 @@
 			grid()
 		}
 	} else{
-		d = rugarch:::.divisortable( n )
+		d = .divisortable( n )
 		par( mfrow= c(d[1], d[2]) )
 		for(i in 1:n){
 			plot(  y[, series[i]], type = "l", col = colors()[16], 
@@ -168,7 +168,7 @@
 			grid()
 		}
 	} else{
-		d = rugarch:::.divisortable( n )
+		d = .divisortable( n )
 		par( mfrow= c(d[1], d[2]) )
 		for(i in 1:n){
 			plot(  abs(actual[, series[i]]), type = "l", col = colors()[16], 
@@ -227,7 +227,7 @@
 			grid()
 		}
 	} else{
-		d = rugarch:::.divisortable( nc )
+		d = .divisortable( nc )
 		par( mfrow= c(d[1], d[2]) )
 		for(i in 1:nc){
 			plot(  xts(H[ series[idx[i, 1]], series[idx[i, 2]], 1:T], xDates),
@@ -286,7 +286,7 @@
 			grid()
 		}
 	} else{
-		d = rugarch:::.divisortable( nc )
+		d = .divisortable( nc )
 		par( mfrow= c(d[1], d[2]) )
 		for(i in 1:nc){
 			plot(  xts(H[ series[idx[i, 1]], series[idx[i, 2]], 1:T], xDates),
@@ -445,7 +445,7 @@
 				title( paste( "DCC Series Rolling Forecast\n(page...", j, ")", sep = ""), outer = TRUE, line = -1.5, cex = 0.75)
 			}
 		} else{
-			d = rugarch:::.divisortable( n )
+			d = .divisortable( n )
 			par( mfrow= c(d[1], d[2]) )
 			for(i in 1:n){
 				tmp = yforc[,series[i]]
@@ -534,7 +534,7 @@
 				title( paste( "DCC Series Unconditional Forecast\n(page...", j, ")", sep = ""), outer = TRUE, line = -1.5, cex = 0.75)
 			}
 		} else{
-			d = rugarch:::.divisortable( n )
+			d = .divisortable( n )
 			par( mfrow= c(d[1], d[2]) )
 			for(i in 1:n){
 				tmp = yforc[,series[i]]
@@ -615,7 +615,7 @@
 				title( paste( "DCC Sigma Rolling Forecast\n(page...", j, ")", sep = ""), outer = TRUE, line = -1.5, cex = 0.75)
 			}
 		} else{
-			d = rugarch:::.divisortable( n )
+			d = .divisortable( n )
 			par( mfrow= c(d[1], d[2]) )
 			for(i in 1:n){
 				tmp = yforc[,series[i]]
@@ -704,7 +704,7 @@
 				title( paste( "DCC Sigma Unconditional Forecast\n(page...", j, ")", sep = ""), outer = TRUE, line = -1.5, cex = 0.75)
 			}
 		} else{
-			d = rugarch:::.divisortable( n )
+			d = .divisortable( n )
 			par( mfrow= c(d[1], d[2]) )
 			for(i in 1:n){
 				tmp = yforc[,series[i]]
@@ -796,7 +796,7 @@
 				title( paste( "DCC Covariance Rolling Forecast\n(page...", j, ")", sep = ""), outer = TRUE, line = -2, cex = 0.75)
 			}
 		} else{
-			d = rugarch:::.divisortable( nc )
+			d = .divisortable( nc )
 			par( mfrow= c(d[1], d[2]) )
 			for(i in 1:nc){
 				tmpf = sapply(x@mforecast$H, FUN = function(x) x[series[idx[i, 1]], series[idx[i, 2]], 1])
@@ -883,7 +883,7 @@
 				title( paste( "DCC Unconditional Covariance Forecast\n(page...", j+1, ")", sep = ""), outer = TRUE, line = -1.5, cex = 0.75)
 			}
 		} else{
-			d = rugarch:::.divisortable( nc )
+			d = .divisortable( nc )
 			par( mfrow= c(d[1], d[2]) )
 			for(i in 1:nc){
 				tmpf = apply(x@mforecast$H[[1]], 3, FUN = function(x) x[series[idx[i, 1]], series[idx[i, 2]]] )
@@ -978,7 +978,7 @@
 				title( paste( "DCC Correlation Rolling Forecast\n(page...", j, ")", sep = ""), outer = TRUE, line = -2, cex = 0.75)
 			}
 		} else{
-			d = rugarch:::.divisortable( nc )
+			d = .divisortable( nc )
 			par( mfrow= c(d[1], d[2]) )
 			for(i in 1:nc){
 				tmpf = sapply(fR, FUN = function(x) x[series[idx[i, 1]], series[idx[i, 2]]])
@@ -1064,7 +1064,7 @@
 				title( paste( "DCC Unconditional Correlation Forecast\n(page...", j+1, ")", sep = ""), outer = TRUE, line = -1.5, cex = 0.75)
 			}
 		} else{
-			d = rugarch:::.divisortable( nc )
+			d = .divisortable( nc )
 			par( mfrow= c(d[1], d[2]) )
 			for(i in 1:nc){
 				tmpf = apply(fR, 3, FUN = function(x) x[series[idx[i, 1]], series[idx[i, 2]]] )
@@ -1330,7 +1330,7 @@
 			title( paste( "DCC Series Rolling Forecast\n(page...", j, ")", sep = ""), outer = TRUE, line = -1.5, cex = 0.75)
 		}
 	} else{
-		d = rugarch:::.divisortable( n )
+		d = .divisortable( n )
 		par( mfrow= c(d[1], d[2]) )
 		for(i in 1:n){
 			tmp = X[,series[i]]
@@ -1404,7 +1404,7 @@
 			title( paste( "DCC Series Rolling Forecast\n(page...", j, ")", sep = ""), outer = TRUE, line = -1.5, cex = 0.75)
 		}
 	} else{
-		d = rugarch:::.divisortable( n )
+		d = .divisortable( n )
 		par( mfrow= c(d[1], d[2]) )
 		for(i in 1:n){
 			tmp = X[,series[i]]
@@ -1469,7 +1469,7 @@
 			title( paste( "DCC Series Rolling Forecast\n(page...", j, ")", sep = ""), outer = TRUE, line = -1.5, cex = 0.75)
 		}
 	} else{
-		d = rugarch:::.divisortable( n )
+		d = .divisortable( n )
 		par( mfrow= c(d[1], d[2]) )
 		for(i in 1:n){
 			plot( xts(X[series[idx[i,1]],series[idx[i,2]],], D), col =1, 
@@ -1528,7 +1528,7 @@
 			title( paste( "DCC Series Rolling Forecast\n(page...", j, ")", sep = ""), outer = TRUE, line = -1.5, cex = 0.75)
 		}
 	} else{
-		d = rugarch:::.divisortable( n )
+		d = .divisortable( n )
 		par( mfrow= c(d[1], d[2]) )
 		for(i in 1:n){
 			plot( xts(X[series[idx[i,1]],series[idx[i,2]],], D), col =1, 
@@ -1608,4 +1608,14 @@
 	x = matrix(1, n, n)
 	indx = which(x == lower.tri(x, diag = diag), arr.ind = TRUE)
 	return( indx )
+}
+
+.divisortable = function(n) 
+{
+	z = matrix(c(1, 1, 1, 2, 2, 1, 3, 2, 2, 4, 2, 2, 5, 2, 3, 
+					6, 2, 3, 7, 2, 4, 8, 2, 4, 9, 3, 3, 10, 3, 4, 11, 3, 
+					4, 12, 3, 4, 13, 4, 4, 14, 4, 4, 15, 4, 4, 16, 4, 4, 
+					17, 4, 5, 18, 4, 5, 19, 4, 5, 20, 4, 5), ncol = 3, byrow = TRUE)
+	d = which(n == z[, 1])
+	return(z[d, 2:3])
 }

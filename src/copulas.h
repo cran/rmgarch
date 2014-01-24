@@ -16,11 +16,8 @@
 #################################################################################*/
 #ifndef _copulas_H
 #define _copulas_H
-#include <R.h>
-#include <Rmath.h>
-#include <math.h>
-#include <RcppArmadillo.h>
 #include "rmdist.h"
+#include <RcppArmadillo.h>
 RcppExport SEXP copulaNormalC1(SEXP , SEXP);
 RcppExport SEXP copulaNormalC2(SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP);
 RcppExport SEXP copulaStudentC1(SEXP , SEXP , SEXP , SEXP , SEXP);

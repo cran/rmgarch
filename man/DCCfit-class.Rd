@@ -71,7 +71,7 @@ Class \code{"\linkS4class{rGARCH}"}, by class "mGARCHfit", distance 3.
     impact respectively), \sQuote{pair} (defaults to c(1,2)), \sQuote{plot} 
     (logical) and \sQuote{plot.type} with a choice of either \dQuote{surface} or 
     \dQuote{contour}. }
-	 }
+    }
 }
 \references{
 Engle, R.F. and Sheppard, K. 2001, Theoretical and empirical properties of 

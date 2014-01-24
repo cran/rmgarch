@@ -156,25 +156,25 @@ setReplaceMethod(f="setstart", signature= c(object = "DCCspec", value = "vector"
 
 dccfit = function(spec, data, out.sample = 0, solver = "solnp", solver.control = list(), 
 		fit.control = list(eval.se = TRUE, stationarity = TRUE, scale = FALSE), 
-		cluster = NULL, fit = NULL, VAR.fit = NULL, ...)
+		cluster = NULL, fit = NULL, VAR.fit = NULL, realizedVol = NULL, ...)
 {
 	UseMethod("dccfit")
 }
 
 .xdccfit = function(spec, data, out.sample = 0, solver = "solnp", solver.control = list(), 
 		fit.control = list(eval.se = TRUE, stationarity = TRUE, scale = FALSE), 
-		cluster = NULL, fit = NULL, VAR.fit = NULL, ...)
+		cluster = NULL, fit = NULL, VAR.fit = NULL, realizedVol = NULL, ...)
 {
 	if(spec@model$DCC == "FDCC"){
 		ans = .fdccfit(spec = spec, data = data, out.sample = out.sample, 
 				solver = solver, solver.control = solver.control, 
 				fit.control = fit.control, cluster = cluster, fit = fit, 
-				VAR.fit = VAR.fit, ...)
+				VAR.fit = VAR.fit, realizedVol = realizedVol, ...)
 	} else{
 		ans = .dccfit(spec = spec, data = data, out.sample = out.sample, 
 				solver = solver, solver.control = solver.control, 
 				fit.control = fit.control, cluster = cluster, fit = fit, 
-				VAR.fit = VAR.fit, ...)
+				VAR.fit = VAR.fit, realizedVol = realizedVol, ...)
 	}
 	return(ans)
 }
@@ -184,20 +184,22 @@ setMethod("dccfit", signature(spec = "DCCspec"), .xdccfit)
 # filter method
 #----------------------------------------------------------------------------------
 dccfilter = function(spec, data, out.sample = 0, filter.control = list(n.old = NULL), 
-		cluster = NULL, varcoef = NULL, ...)
+		cluster = NULL, varcoef = NULL, realizedVol = NULL, ...)
 {
 	UseMethod("dccfilter")
 }
 
 .xdccfilter = function(spec, data, out.sample = 0, filter.control = list(n.old = NULL), 
-		cluster = NULL, varcoef = NULL, ...)
+		cluster = NULL, varcoef = NULL, realizedVol = NULL, ...)
 {
 	if(spec@model$DCC == "FDCC"){
 		ans = .fdccfilter(spec = spec, data = data, out.sample = out.sample, 
-				filter.control = filter.control, cluster = cluster, varcoef = varcoef, ...)
+				filter.control = filter.control, cluster = cluster, varcoef = varcoef, 
+				realizedVol = realizedVol,...)
 	} else{
 		ans = .dccfilter(spec = spec, data = data, out.sample = out.sample, 
-				filter.control = filter.control, cluster = cluster, varcoef = varcoef, ...)
+				filter.control = filter.control, cluster = cluster, varcoef = varcoef, 
+				realizedVol = realizedVol,...)
 	}
 	return(ans)
 }
@@ -235,7 +237,8 @@ dccroll = function(spec, data, n.ahead = 1, forecast.length = 50, refit.every = 
 		n.start = NULL, refit.window = c("recursive", "moving"), window.size = NULL, 
 		solver = "solnp", solver.control = list(), 
 		fit.control = list(eval.se = TRUE, stationarity = TRUE, scale = FALSE), 
-		cluster = NULL, save.fit = FALSE, save.wdir = NULL, ...)
+		cluster = NULL, save.fit = FALSE, save.wdir = NULL, 
+		realizedVol = NULL, ...)
 {
 	UseMethod("dccroll")
 }
@@ -252,7 +255,8 @@ dccsim = function(fitORspec, n.sim = 1000, n.start = 0, m.sim = 1,
 		startMethod = c("unconditional", "sample"), presigma = NULL, 
 		preresiduals = NULL, prereturns = NULL, preQ = NULL, preZ = NULL, 
 		Qbar = NULL, Nbar = NULL, rseed = NULL, mexsimdata = NULL, 
-		vexsimdata = NULL, cluster = NULL, VAR.fit = NULL, ...)
+		vexsimdata = NULL, cluster = NULL, VAR.fit = NULL, 
+		prerealized = NULL, ...)
 {
 	UseMethod("dccsim")
 }
@@ -261,7 +265,7 @@ dccsim = function(fitORspec, n.sim = 1000, n.start = 0, m.sim = 1,
 		startMethod = c("unconditional", "sample"), presigma = NULL, 
 		preresiduals = NULL, prereturns = NULL, preQ = NULL, preZ = NULL, 
 		Qbar = NULL, Nbar = NULL, rseed = NULL, mexsimdata = NULL, 
-		vexsimdata = NULL, cluster = NULL, VAR.fit = NULL, ...)
+		vexsimdata = NULL, cluster = NULL, VAR.fit = NULL, prerealized = NULL, ...)
 {
 	if(fitORspec@model$DCC == "FDCC"){
 		ans = .fdccsim.fit(fitORspec = fitORspec, n.sim = n.sim, n.start = n.start, 
@@ -269,14 +273,14 @@ dccsim = function(fitORspec, n.sim = 1000, n.start = 0, m.sim = 1,
 				preresiduals = preresiduals, prereturns = prereturns, 
 				preQ = preQ, preZ = preZ, Qbar = Qbar, rseed = rseed, 
 				mexsimdata = mexsimdata, vexsimdata = vexsimdata, 
-				cluster = cluster, ...)
+				cluster = cluster, prerealized = prerealized, ...)
 	} else{
 		ans = .dccsim.fit(fitORspec = fitORspec, n.sim = n.sim, n.start = n.start, 
 				m.sim = m.sim, startMethod = startMethod, presigma = presigma, 
 				preresiduals = preresiduals, prereturns = prereturns, 
 				preQ = preQ, preZ = preZ, Qbar = Qbar, Nbar = Nbar, 
 				rseed = rseed, mexsimdata = mexsimdata, vexsimdata = vexsimdata, 
-				cluster = cluster, ...)
+				cluster = cluster, prerealized = prerealized, ...)
 	}
 	return(ans)
 }
@@ -285,7 +289,8 @@ dccsim = function(fitORspec, n.sim = 1000, n.start = 0, m.sim = 1,
 		startMethod = c("unconditional", "sample"), presigma = NULL, 
 		preresiduals = NULL, prereturns = NULL, preQ = NULL, preZ = NULL, 
 		Qbar = NULL, Nbar = NULL, rseed = NULL, mexsimdata = NULL, 
-		vexsimdata = NULL, cluster = NULL, VAR.fit = NULL, ...)
+		vexsimdata = NULL, cluster = NULL, VAR.fit = NULL, 
+		prerealized = NULL, ...)
 {
 	if(fitORspec@model$DCC == "FDCC"){
 		ans = .fdccsim.spec(fitORspec = fitORspec, n.sim = n.sim, n.start = n.start, 
@@ -293,14 +298,14 @@ dccsim = function(fitORspec, n.sim = 1000, n.start = 0, m.sim = 1,
 				preresiduals = preresiduals, prereturns = prereturns, 
 				preQ = preQ, preZ = preZ, Qbar = Qbar, rseed = rseed, 
 				mexsimdata = mexsimdata, vexsimdata = vexsimdata, 
-				cluster = cluster, VAR.fit = VAR.fit, ...)
+				cluster = cluster, VAR.fit = VAR.fit, prerealized = prerealized, ...)
 	} else{
 		ans = .dccsim.spec(fitORspec = fitORspec, n.sim = n.sim, n.start = n.start, 
 				m.sim = m.sim, startMethod = startMethod, presigma = presigma, 
 				preresiduals = preresiduals, prereturns = prereturns, 
 				preQ = preQ, preZ = preZ, Qbar = Qbar, Nbar = Nbar, 
 				rseed = rseed, mexsimdata = mexsimdata, vexsimdata = vexsimdata, 
-				cluster = cluster, VAR.fit = VAR.fit, ...)
+				cluster = cluster, VAR.fit = VAR.fit, prerealized = prerealized, ...)
 	}
 	return(ans)
 }

@@ -10,7 +10,7 @@ Method for creating a DCC-GARCH fit object.
 \usage{
 dccfit(spec, data, out.sample = 0, solver = "solnp", solver.control = list(), 
 fit.control = list(eval.se = TRUE, stationarity = TRUE, scale = FALSE), 
-cluster = NULL, fit = NULL, VAR.fit = NULL, ...)
+cluster = NULL, fit = NULL, VAR.fit = NULL, realizedVol = NULL, ...)
 }
 \arguments{
   	\item{spec}{ A \code{\linkS4class{DCCspec}} object created by calling 
@@ -37,6 +37,7 @@ cluster = NULL, fit = NULL, VAR.fit = NULL, ...)
 	\code{\linkS4class{uGARCHmultifit}} object (see details).}
 	\item{VAR.fit}{ (optional) A previously estimated VAR object returned from 
 	calling the \code{\link{varxfit}} function.}
+	\item{realizedVol}{ Required xts matrix for the realGARCH model.}
 	\item{...}{ . }
 }
 \value{

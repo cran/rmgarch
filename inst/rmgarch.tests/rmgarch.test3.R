@@ -845,12 +845,11 @@ rmgarch.test3e = function(cluster = NULL)
 					method = c("Kendall", "ML")[2], time.varying = TRUE, 
 					transformation = c("parametric", "empirical", "spd")[1]))
 	
-	fit1 = cgarchfit(spec1, data = Dat, cluster = cluster,
-			fit.control = list(eval.se=FALSE))
+	fit1 = cgarchfit(spec1, data = Dat, cluster = cluster, fit.control = list(eval.se=FALSE))
 	
 	
-	sim1 = cgarchsim(fit1, n.sim = 1000, m.sim = 10, startMethod = "sample")
-	sim2 = cgarchsim(fit1, n.sim = 2, m.sim = 1000, startMethod = "sample")
+	sim1 = cgarchsim(fit1, n.sim = 1000, m.sim = 10, startMethod = "sample", cluster=cluster)
+	sim2 = cgarchsim(fit1, n.sim = 2, m.sim = 1000, startMethod = "sample", cluster=cluster)
 	# 2-ahead mean covariance (1-ahead has no uncertainty).
 	meanH = matrix(0,  3, 3)
 	for(i in 1:1000) meanH = meanH + sim2@msim$simH[[i]][,,2]

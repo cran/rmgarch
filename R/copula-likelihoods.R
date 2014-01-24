@@ -114,7 +114,8 @@ copula.tvnormalLLH2 = function(pars, arglist)
 		specx[[i]] = mspec@spec[[i]]
 		setfixed(specx[[i]]) = as.list(mpars[which(midx[,i]==1), i])
 	}
-	flt = multifilter(multifitORspec = multispec(specx), data = data, out.sample = n.start)
+	flt = multifilter(multifitORspec = multispec(specx), data = xts(data, arglist$index[1:nrow(data)]), 
+			out.sample = n.start, realizedVol = arglist$realizedVol[1:nrow(data),])
 	garch.llhvec = sapply(flt@filter, FUN = function(x) x@filter$log.likelihoods)
 	H = sigma(flt)
 	resids = residuals(flt)
@@ -355,7 +356,8 @@ copula.normalLLH2 = function(pars, arglist)
 		specx[[i]] = mspec@spec[[i]]
 		setfixed(specx[[i]]) = as.list(mpars[which(midx[,i]==1), i])
 	}
-	flt = multifilter(multifitORspec = multispec(specx), data = data, out.sample = n.start)
+	flt = multifilter(multifitORspec = multispec(specx), data = xts(data, arglist$index[1:nrow(data)]), 
+			out.sample = n.start, realizedVol = arglist$realizedVol[1:nrow(data),])
 	garch.llhvec = sapply(flt@filter, FUN = function(x) x@filter$log.likelihoods)
 	H = sigma(flt)
 	resids = residuals(flt)
@@ -519,7 +521,7 @@ copula.tvstudentLLH1 = function(pars, arglist)
 	sumdccg = sum(ipars[idx["dccg",1]:idx["dccg",2],1])
 	udata = arglist$ures
 	T = dim(udata)[1]
-	Z = matrix(rugarch:::qstd(udata, nu = ipars[idx["mshape",1], 1]), ncol = m)
+	Z = matrix(rugarch:::qstd(udata, shape = ipars[idx["mshape",1], 1]), ncol = m)
 	Qbar = cov(Z)
 	# Take care of the Asymmetry Matrices
 	if(modelinc[6]>0){
@@ -532,7 +534,7 @@ copula.tvstudentLLH1 = function(pars, arglist)
 		aZ = Ibar*Z*0
 		Nbar = matrix(0, m, m)
 	}
-	dtZ = log(matrix(rugarch:::dstd(Z, nu = ipars[idx["mshape",1], 1]), ncol = m))
+	dtZ = log(matrix(rugarch:::dstd(Z, shape = ipars[idx["mshape",1], 1]), ncol = m))
 	dtZ = rbind( matrix(0, nrow = mx, ncol = m), dtZ )
 	Z = rbind( matrix(0, nrow = mx, ncol = m), Z )
 	aZ = rbind( matrix(0, nrow = mx, ncol = m), aZ )
@@ -603,7 +605,8 @@ copula.tvstudentLLH2 = function(pars, arglist)
 		specx[[i]] = mspec@spec[[i]]
 		setfixed(specx[[i]]) = as.list(mpars[which(midx[,i]==1), i])
 	}
-	flt = multifilter(multifitORspec = multispec(specx), data = data, out.sample = n.start)
+	flt = multifilter(multifitORspec = multispec(specx), data = xts(data, arglist$index[1:nrow(data)]), 
+			out.sample = n.start, realizedVol = arglist$realizedVol[1:nrow(data),])
 	garch.llhvec = sapply(flt@filter, FUN = function(x) x@filter$log.likelihoods)
 	H = sigma(flt)
 	resids = residuals(flt)
@@ -632,7 +635,7 @@ copula.tvstudentLLH2 = function(pars, arglist)
 		xn = which(ures < (1.5*.eps))
 		ures[xn] = .eps
 	}	
-	Z = matrix(rugarch:::qstd(ures, nu = ipars[idx["mshape",1], 1]), ncol = m)
+	Z = matrix(rugarch:::qstd(ures, shape = ipars[idx["mshape",1], 1]), ncol = m)
 	Qbar = cov(Z)
 	# Take care of the Asymmetry Matrices
 	if(modelinc[6]>0){
@@ -645,7 +648,7 @@ copula.tvstudentLLH2 = function(pars, arglist)
 		aZ = Ibar*Z*0
 		Nbar = matrix(0, m, m)
 	}
-	dtZ = log(matrix(rugarch:::dstd(Z, nu = ipars[idx["mshape",1], 1]), ncol = m))
+	dtZ = log(matrix(rugarch:::dstd(Z, shape = ipars[idx["mshape",1], 1]), ncol = m))
 	dtZ = rbind( matrix(0, nrow = mx, ncol = m), dtZ )
 	Z = rbind( matrix(0, nrow = mx, ncol = m), Z )
 	aZ = rbind( matrix(0, nrow = mx, ncol = m), aZ )
@@ -726,8 +729,8 @@ copula.tvstudentLLH3 = function(arglist)
 		xn = which(ures < (1.5*.eps))
 		ures[xn] = .eps
 	}
-	Z = matrix(rugarch:::qstd(ures, nu = ipars[idx["mshape",1], 1]), ncol = m)
-	dtZ = log(matrix(rugarch:::dstd(Z, nu = ipars[idx["mshape",1], 1]), ncol = m))	
+	Z = matrix(rugarch:::qstd(ures, shape = ipars[idx["mshape",1], 1]), ncol = m)
+	dtZ = log(matrix(rugarch:::dstd(Z, shape = ipars[idx["mshape",1], 1]), ncol = m))	
 	Qbar = cov(Z[1:dcc.old, , drop = FALSE])
 	# Take care of the Asymmetry Matrices
 	if(modelinc[6]>0){
@@ -781,13 +784,14 @@ copula.studentLLH1 = function(pars, arglist)
 	fit.control = arglist$fit.control
 	udata = arglist$ures
 	T = dim(udata)[1]
-	Z = qt(udata, df = ipars[idx["mshape",1], 1])
-	dtZ = dt(Z, df = ipars[idx["mshape",1], 1], log = TRUE)
-	
+	Z = matrix(rugarch:::qstd(udata, shape = ipars[idx["mshape",1], 1]), ncol = m)
+	# Z = qt(udata, df = ipars[idx["mshape",1], 1])
+	# dtZ = dt(Z, df = ipars[idx["mshape",1], 1], log = TRUE)
+	dtZ = log(matrix(rugarch:::dstd(Z, shape = ipars[idx["mshape",1], 1]), ncol = m))
 	if(modelinc[3]>0){
 		Rbar = .Pconstruct(ipars[idx["C", 1]:idx["C", 2],1])
 	} else{
-		Rtau = .Kendall(Z)
+		Rtau = cor.fk(Z)
 		Rbar = sin(pi * Rtau/2)
 	}
 	diag(Rbar) = 1
@@ -847,7 +851,8 @@ copula.studentLLH2 = function(pars, arglist)
 		specx[[i]] = mspec@spec[[i]]
 		setfixed(specx[[i]]) = as.list(mpars[which(midx[,i]==1), i])
 	}
-	flt = multifilter(multifitORspec = multispec(specx), data = data, out.sample = n.start)
+	flt = multifilter(multifitORspec = multispec(specx), data = xts(data, arglist$index[1:nrow(data)]), 
+			out.sample = n.start, realizedVol = arglist$realizedVol[1:nrow(data),])
 	garch.llhvec = sapply(flt@filter, FUN = function(x) x@filter$log.likelihoods)
 	H = sigma(flt)
 	resids = residuals(flt)
@@ -877,13 +882,16 @@ copula.studentLLH2 = function(pars, arglist)
 		ures[xn] = .eps
 	}
 	
-	Z = qt(ures, df = ipars[idx["mshape",1], 1])
-	dtZ = dt(Z, df = ipars[idx["mshape",1], 1], log = TRUE)
+	# Z = qt(ures, df = ipars[idx["mshape",1], 1])
+	# dtZ = dt(Z, df = ipars[idx["mshape",1], 1], log = TRUE)
+	Z = matrix(rugarch:::qstd(ures, shape = ipars[idx["mshape",1], 1]), ncol = m)
+	dtZ = log(matrix(rugarch:::dstd(Z, shape = ipars[idx["mshape",1], 1]), ncol = m))
+	
 	
 	if(modelinc[3]>0){
 		Rbar = .Pconstruct(ipars[idx["C", 1]:idx["C", 2],1])
 	} else{
-		Rtau = .Kendall(Z)
+		Rtau = cor.fk(Z)
 		Rbar = sin(pi * Rtau/2)
 	}
 	diag(Rbar) = 1
@@ -965,13 +973,15 @@ copula.studentLLH3 = function(arglist)
 		ures[xn] = .eps
 	}
 	
-	Z = qt(ures, df = ipars[idx["mshape",1], 1])
-	dtZ = dt(Z, df = ipars[idx["mshape",1], 1], log = TRUE)
+	#Z = qt(ures, df = ipars[idx["mshape",1], 1])
+	#dtZ = dt(Z, df = ipars[idx["mshape",1], 1], log = TRUE)
+	Z = matrix(rugarch:::qstd(ures, shape = ipars[idx["mshape",1], 1]), ncol = m)
+	dtZ = log(matrix(rugarch:::dstd(Z, shape = ipars[idx["mshape",1], 1]), ncol = m))	
 	
 	if(modelinc[3]>0){
 		Rbar = .Pconstruct(ipars[idx["C", 1]:idx["C", 2],1])
 	} else{
-		Rtau = .Kendall(Z[1:dcc.old, , drop = FALSE])
+		Rtau = cor.fk(Z[1:dcc.old, , drop = FALSE])
 		Rbar = sin(pi * Rtau/2)
 	}
 	diag(Rbar) = 1

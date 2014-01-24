@@ -499,7 +499,6 @@ rmgarch.test1e = function(cluster = NULL)
 	toc = Sys.time()-tic
 	cat("Elapsed:", toc, "\n")
 	return(toc)
-	
 }
 
 # NIG filter and test all methods
@@ -852,11 +851,11 @@ rmgarch.test1h = function(cluster = NULL)
 	sink(zz)
 	cat("\nGOGARCH Rolling Methods:\n")
 	# Check methods on roll:
-	head(sigma(roll))
-	rcor(roll)[,,1,drop=FALSE]
-	rcov(roll)[,,1,drop=FALSE]
-	rcoskew(roll)[,,1]
-	rcokurt(roll)[,,1]
+	print(head(sigma(roll)))
+	print(rcor(roll)[,,1,drop=FALSE])
+	print(rcov(roll)[,,1,drop=FALSE])
+	print(rcoskew(roll)[,,1])
+	print(rcokurt(roll)[,,1])
 	sink(type="message")
 	sink()
 	close(zz)
@@ -921,7 +920,7 @@ rmgarch.test1i = function(cluster = NULL)
 	df = dfft(cf, index=0)
 	m1 = gm[1,1,1]
 	f = function(x) (x-m1)^4*df(x)
-	nme = integrate(f, -Inf, Inf, rel.tol=1e-9)$value/gm[1,2,1]^4
+	nme = integrate(f, -Inf, Inf, rel.tol=1e-9, stop.on.error=FALSE)$value/gm[1,2,1]^4
 	
 	zz <- file("test1i.txt", open="wt")
 	sink(zz)

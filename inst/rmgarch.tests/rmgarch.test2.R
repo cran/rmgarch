@@ -31,14 +31,16 @@ rmgarch.test2a = function(cluster = NULL)
 	spec1 = dccspec(uspec = multispec( replicate(3, uspec) ), dccOrder = c(1,1),  distribution = "mvnorm")
 	fit1 = dccfit(spec1, data = Dat, fit.control = list(eval.se=FALSE))
 	
-	specx1 = ugarchspec(mean.model = list(armaOrder = c(2,1)), variance.model = list(garchOrder = c(3,1), model = "sGARCH"), 
+	specx1 = ugarchspec(mean.model = list(armaOrder = c(2,1)), variance.model = list(garchOrder = c(3,1), model = "sGARCH",
+					variance.targeting=TRUE), 
 			distribution.model = "norm")
-	specx2 = ugarchspec(mean.model = list(armaOrder = c(0,1)), variance.model = list(garchOrder = c(1,1), model = "eGARCH"), 
+	specx2 = ugarchspec(mean.model = list(armaOrder = c(0,1)), variance.model = list(garchOrder = c(1,1), model = "eGARCH",
+					variance.targeting=F), 
 			distribution.model = "norm")
 	specx3 = ugarchspec(mean.model = list(armaOrder = c(0,0)), variance.model = list(garchOrder = c(1,1), model = "apARCH"), 
 			distribution.model = "norm")
 	spec2 = dccspec(uspec = multispec( list(specx1, specx2, specx3) ), dccOrder = c(1,1),  distribution = "mvnorm")
-	fit2 = dccfit(spec2, data = Dat, fit.control = list(eval.se=FALSE))
+	fit2 = dccfit(spec2, data = Dat, fit.control = list(eval.se=T))
 	
 	uspec = ugarchspec(mean.model = list(armaOrder = c(0,0),  include.mean = FALSE), variance.model = list(garchOrder = c(1,1), model = "sGARCH"), 
 			distribution.model = "norm")
@@ -116,7 +118,7 @@ rmgarch.test2b = function(cluster = NULL)
 	
 	# 2 stage estimation should usually always use Normal for 1-stage (see below for student)
 	uspec = ugarchspec(mean.model = list(armaOrder = c(1,1)), 
-			variance.model = list(garchOrder = c(1,1), model = "eGARCH"), 
+			variance.model = list(garchOrder = c(1,1), model = "gjrGARCH", variance.targeting=TRUE), 
 			distribution.model = "norm")
 	mspec = multispec( replicate(10, uspec) )
 	multf = multifit(mspec, Dat, cluster = cluster)
@@ -142,13 +144,12 @@ rmgarch.test2b = function(cluster = NULL)
 	# The proper way to estimate the DCC-Student Model in a 2-stage setup
 	uspec = ugarchspec(
 			mean.model = list(armaOrder = c(1,1)), 
-			variance.model = list(garchOrder = c(1,1), model = "eGARCH"), 
+			variance.model = list(garchOrder = c(1,1), model = "eGARCH", variance.targeting=TRUE), 
 			distribution.model = "std", fixed.pars = list(shape=5))
 	spec3 = dccspec(uspec = multispec( replicate(10, uspec) ), dccOrder = c(1,1), 
 			 distribution = "mvt", fixed.pars = list(mshape = 5))
 	fit3 = dccfit(spec3, data = Dat, solver = "solnp", 
-			fit.control = list(eval.se=TRUE), parallel = parallel, 
-			parallel.control = parallel.control)
+			fit.control = list(eval.se=TRUE), cluster = cluster)
 	
 	# 
 	multfstd = multifit(multispec( replicate(10, uspec) ), Dat)
@@ -463,11 +464,20 @@ rmgarch.test2d = function(cluster = NULL)
 	data(dji30retw)
 	Dat = dji30retw[, 1:3, drop = FALSE]
 	uspec = ugarchspec(mean.model = list(armaOrder = c(1,2)), 
-			variance.model = list(garchOrder = c(1,1), model = "eGARCH"), 
+			variance.model = list(garchOrder = c(1,1), model = "sGARCH",
+					variance.targeting=TRUE), 
 			distribution.model = "norm")
 	spec1 = dccspec(uspec = multispec( replicate(3, uspec) ),  
 			dccOrder = c(1,1),  distribution = "mvnorm")
 	fit1 = dccfit(spec1, data = Dat, fit.control = list(eval.se=TRUE))
+	
+	# for filtering you need to remove variance.targeting:
+	uspec = ugarchspec(mean.model = list(armaOrder = c(1,2)), 
+			variance.model = list(garchOrder = c(1,1), model = "sGARCH",
+					variance.targeting=FALSE), 
+			distribution.model = "norm")
+	spec1 = dccspec(uspec = multispec( replicate(3, uspec) ),  
+			dccOrder = c(1,1),  distribution = "mvnorm")
 	
 	vspec = vector(mode = "list", length = 3)
 	midx = fit1@model$midx
@@ -501,7 +511,8 @@ rmgarch.test2d = function(cluster = NULL)
 	#####################################################################
 	# With VAR spec pre-fitted
 	uspec = ugarchspec(mean.model = list(armaOrder = c(0,0)), 
-			variance.model = list(garchOrder = c(1,1), model = "eGARCH"), 
+			variance.model = list(garchOrder = c(1,1), model = "eGARCH", 
+					variance.targeting=TRUE), 
 			distribution.model = "norm")
 	# remember to pass lag length to dccspec for VAR
 	spec2 = dccspec(uspec = multispec( replicate(3, uspec) ), VAR = TRUE, lag = 2, 
@@ -913,12 +924,12 @@ rmgarch.test2e = function(cluster = NULL)
 	options(width = 120)
 	zz <- file("test2e2.txt", open="wt")
 	sink(zz)
-	print( all.equal(first(rc1)[,,1], first(rc2)[,,1]) )
-	print( all.equal(last(rc1)[,,1], last(rc2)[,,1]) )
-	print( all.equal(first(rh1)[,,1], first(rh2)[,,1]) )
-	print( all.equal(last(rh1)[,,1], last(rh2)[,,1]) )
-	print( all.equal(head(fitted(sim1)), head(fitted(sim2))) )
-	print( all.equal(head(fitted(sim1, sim=2)), head(fitted(sim2, sim=2))) )
+	print( all.equal(first(rc1)[,,1], first(rc2)[,,1], check.attributes=FALSE) )
+	print( all.equal(last(rc1)[,,1], last(rc2)[,,1], check.attributes=FALSE) )
+	print( all.equal(first(rh1)[,,1], first(rh2)[,,1], check.attributes=FALSE) )
+	print( all.equal(last(rh1)[,,1], last(rh2)[,,1], check.attributes=FALSE) )
+	print( all.equal(head(fitted(sim1)), head(fitted(sim2)), check.attributes=FALSE) )
+	print( all.equal(head(fitted(sim1, sim=2)), head(fitted(sim2, sim=2)), check.attributes=FALSE) )
 	sink(type="message")
 	sink()
 	close(zz)
@@ -1156,7 +1167,7 @@ rmgarch.test2f = function(cluster = NULL)
 	# forecast R --> unconditional R (Rbar) as N --> large
 	UQ = fit1@mfit$Qbar*(1-sum(coef(fit1, "dcc")))
 	Rbar = UQ/(sqrt(diag(UQ)) %*% t(sqrt(diag(UQ))))
-	all.equal(Rbar, forc1@mforecast$R[[1]][,,1500])
+	print(all.equal(Rbar, forc1@mforecast$R[[1]][,,1500]))
 	#############################################
 	sink(type="message")
 	sink()

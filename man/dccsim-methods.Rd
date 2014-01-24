@@ -13,7 +13,7 @@ dccsim(fitORspec, n.sim = 1000, n.start = 0, m.sim = 1,
 startMethod = c("unconditional", "sample"), presigma = NULL, preresiduals = NULL, 
 prereturns = NULL, preQ = NULL, preZ = NULL, Qbar = NULL, Nbar = NULL, 
 rseed = NULL, mexsimdata = NULL, vexsimdata = NULL, cluster = NULL, 
-VAR.fit = NULL, ...)
+VAR.fit = NULL, prerealized = NULL, ...)
 }
 \arguments{
   	\item{fitORspec}{ A \code{\linkS4class{DCCspec}} or \code{\linkS4class{DCCfit}} 
@@ -65,6 +65,8 @@ VAR.fit = NULL, ...)
 	\code{\link{varxfilter}} or \code{\link{varxfit}} function with \code{postpad} 
 	set to \dQuote{constant}. This is required for the specification dispatch
 	method.}
+	\item{prerealized}{Allows the starting realized volatility values to be provided 
+	by the user for the univariate GARCH dynamics.}
   	\item{...}{.}
 }
 \value{

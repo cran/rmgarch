@@ -85,36 +85,37 @@
 }
 
 # about 3 times faster than "cor" function
-.Kendall = function(data) 
-{
-	n <- dim(data)[1]
-	d <- dim(data)[2]
-	Rho <- matrix(0, nrow = d, ncol = d)
-	gr = as.matrix(combn(1:d, 2))
-	z = apply(gr, 2, FUN = function(x) Kendall(data[,x[1]], data[, x[2]])$tau)
-	Rho[lower.tri(Rho)] = z
-	Rho = Rho + t(Rho)
-	diag(Rho) = 1
-	nms <- dimnames(data)[[2]]
-	dimnames(Rho) <- list(nms, nms)
-	return( Rho )
-}
+# NO LONGER USED...replaced by cor.fk of pcaPP package
+#.Kendall = function(data) 
+#{
+#	n <- dim(data)[1]
+#	d <- dim(data)[2]
+#	Rho <- matrix(0, nrow = d, ncol = d)
+#	gr = as.matrix(combn(1:d, 2))
+#	z = apply(gr, 2, FUN = function(x) Kendall(data[,x[1]], data[, x[2]])$tau)
+#	Rho[lower.tri(Rho)] = z
+#	Rho = Rho + t(Rho)
+#	diag(Rho) = 1
+#	nms <- dimnames(data)[[2]]
+#	dimnames(Rho) <- list(nms, nms)
+#	return( Rho )
+#}
 
-.fit.kendall = function(Udata)
-{
-	Rho = .Kendall(Udata)
-	Rbar = sin(pi * Rho/2)
-	n = dim(Udata)[2]
-	dimn = n * (n - 1) / 2
-	vRbar = Rbar[lower.tri(Rbar)]
-	X = diag(dimn)
-	estimate = lm(vRbar ~ X - 1)$coef
-	A = matrix(0, ncol = n, nrow = n)
-	A[lower.tri(A)] = as.numeric(estimate)
-	A = A + t(A)
-	diag(A) = 1
-	return( A )
-}
+#.fit.kendall = function(Udata)
+#{
+#	Rho = .Kendall(Udata)
+#	Rbar = sin(pi * Rho/2)
+#	n = dim(Udata)[2]
+#	dimn = n * (n - 1) / 2
+#	vRbar = Rbar[lower.tri(Rbar)]
+#	X = diag(dimn)
+#	estimate = lm(vRbar ~ X - 1)$coef
+#	A = matrix(0, ncol = n, nrow = n)
+#	A[lower.tri(A)] = as.numeric(estimate)
+#	A = A + t(A)
+#	diag(A) = 1
+#	return( A )
+#}
 
 ########################################################################
 # From corpcor package:
@@ -144,7 +145,7 @@
 	beta = pars[3]
 	# this is the slowest part of the routine (student quantile)
 	# qt is vectorized but no discernable difference in using apply instead
-	Qdata = apply(data, 2, FUN = function(x) qt(p = x, df = nu))
+	Qdata = apply(data, 2, FUN = function(x) rugarch:::qstd(p = x, shape = nu))
 	n = dim(data)[1]
 	m = dim(data)[2]
 	Qbar = cov(Qdata)
@@ -163,7 +164,7 @@
 .tcopulafn = function(pars, data, Rbar, type = "LLH")
 {
 	nu = pars[1]
-	Qdata = apply(data, 2, FUN = function(x) qt(p = x ,df = nu))
+	Qdata = apply(data, 2, FUN = function(x) rugarch:::qstd(p = x ,shape = nu))
 	#ans = try(.Call("staticCopulaStudent", U = Qdata, Rbar = Rbar, tnu = nu), silent = TRUE)
 	ans = dcopula.student(U = Qdata, Corr = Rbar, df = nu, logvalue = TRUE)
 		

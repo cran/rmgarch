@@ -393,91 +393,70 @@ ghypmvcf = function(z, lambda, alpha, beta, delta, mu)
 	return(cs)
 }
 
+# N (pairs) = 2*(n^2)+n*(n-3)
+# unique 2-pair combinations : factorial(n)/(factorial(n-2)*factorial(2))
+# for each pair:
+# Y = combn(1:n, 2)
+# Tabulation:
+# No. of unique pairs whose difference is 1: n-1 [{2,1},{3,2},...,{n,n-1}]
+# No. of unique pairs whose difference is 2: n-2 [{3,1},{4,2},...,{n,n-2}]
+# No. of unique pairs whose difference is n-1: 1 [{n,1}]
 
-#.cokurt.ind = function(kurtval, sigmaval)
-#{
-#	# when i=j and k=l then we have sigma_i^2 * sigma_j^2
-#	n = length(kurtval)
-#	sigma2 = as.numeric(sigmaval^2)
-#	ck = matrix(0, ncol = n^3, nrow = n)
-#	# diagonal tensor type indices using column type count
-#	n3 = n^3
-#	n2 = n^2
-#	cc1 = NULL
-#	for(i in 1:n) cc1 =  c(cc1, rep(i,n2))
-#	cc2 = NULL
-#	for(i in 1:n) cc2 = c(cc2, rep(i, n))
-#	cc2 = rep(cc2, n)
-#	cc3 = rep(1:n, n2)
-#	cc4 = 1:n
-#	sg=mx= NULL
-#	for(j in 1:n){
-#		for(i in 1:n3){
-#			z=c(cc1[i],cc2[i],cc3[i],cc4[j])
-#			z = sort(z)
-#			if(z[1]==z[2] && z[3] == z[4] && z[2]!=z[3]){
-#				mx = c(mx, (j-1)*n3+i)
-#				ii = unique(z)
-#				#print(ii)
-#				sg = c(sg, sigma2[ii[1]]*sigma2[ii[2]])
-#			}
-#		}
-#	}
-#	# indx1 = by columns
-#	indx1 = ((1:n)-1) * n^3  + ((1:n)-1) * n^2 + ((1:n)-1) * n + (1:n)
-#	# indx2 = by row
-#	indx2 = mx
-#	ck[indx1] = kurtval
-#	ck = t(ck)
-#	ck[indx2] = sg
-#	ck = t(ck)
-#	return(ck)
-#}
 
-# 10x faster version
-.cokurt.ind = function(kurtval, sigmaval){
-	n = length(kurtval)
-	sigma2 = as.numeric(sigmaval^2)
-	ck = matrix(0, ncol = n^3, nrow = n)
-	# diagonal tensor type indices using column type count
-	n3 = n^3
-	n2 = n^2
-	cc1 = NULL
-	for(i in 1:n) cc1 =  c(cc1, rep(i,n2))
-	cc2 = NULL
-	for(i in 1:n) cc2 = c(cc2, rep(i, n))
-	cc2 = rep(cc2, n)
-	cc3 = rep(1:n, n2)
-	cc4 = 1:n
+.cokurt.pairs = function(n)
+{
+	# Author: Alexios Ghalanos 
+	# Copyright (C) 2013 (part of the rmgarch package)
+	# Finds the locations of each i=j, k=l pair in an N x N^3 matrix representing 
+	# the collapsed co-kurtosis tensor
+	# As an example, the N=4 matrix below illustrates the indexing and the position of the pairs:
+	# The code which follows generates the 1-dimensional index (based on columnwise counting) of
+	# each pair and also returns the associates pair (for knowing which sigma values to multiply
+	# to obtain the fourth co-moment).
+	##
+	## j:    1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4
+	## k:    1 1 1 1 2 2 2 2 3 3 3 3 4 4 4 4 1 1 1 1 2 2 2 2 3 3 3 3 4 4 4 4 1 1 1 1 2 2 2 2 3 3 3 3 4 4 4 4 1 1 1 1 2 2 2 2 3 3 3 3 4 4 4 4     
+	## l:    1 2 3 4 1 2 3 4 1 2 3 4 1 2 3 4 1 2 3 4 1 2 3 4 1 2 3 4 1 2 3 4 1 2 3 4 1 2 3 4 1 2 3 4 1 2 3 4 1 2 3 4 1 2 3 4 1 2 3 4 1 2 3 4     
+	## i: 1  . . . . . x . . . . x . . . . x . x . . x . . . . . . . . . . . . . x . . . . . x . . . . . . . . . . x . . . . . . . . x . . .  
+	## i: 2  . x . . x . . . . . . . . . . . x . . . . . . . . . x . . . . x . . . . . . x . . x . . . . . . . . . . . . . x . . . . . x . .
+	## 1: 3  . . x . . . . . x . . . . . . . . . . . . . x . . x . . . . . . x . . . . x . . . . . . . . . x . . . . . . . . . . . x . . x .
+	## i: 4  . . . . . . . . . . . . x . . . . . . . . . . x . . . . . . . . . . . . . . . . . . . x . . x . x . . . . . . . . . x . . . . .
 	
-	N = 1:n3
-	Y = cbind(cc1, cc2, cc3)
-	# sort
-	X = t(apply(Y, 1, "sort"))
-	# eliminate all equals
-	eidx1 = which(( (X[,1]==X[,2])*(X[,2]==X[,3]) ) == 1)
-	# eliminate all different
-	eidx2 = which(( (X[,1]<X[,2])*(X[,2]<X[,3]) ) == 1)
-	eidx = c(eidx1, eidx2)
-	N = N[-eidx]
-	Z = X[-eidx,]
-	# now find the lone pair
-	# unique and length==1
-	# these form the row numbers of the matrix
-	rw = rep(0, dim(Z)[1])
-	for(i in 1:dim(Z)[1]){
-		if(Z[i,1]==Z[i,2]) rw[i] = Z[i,3] else rw[i] = Z[i,1]
+	unique_pairs = factorial(n)/(factorial(n-2)*factorial(2))
+	idx = vector(mode="list", length = unique_pairs)
+	prs = t(combn(n, 2))
+	prs = cbind(prs[,2], prs[,1], prs[,2] - prs[,1])
+	prs = prs[order(prs[,1]-prs[,2]), ]
+	colnames(prs) = c("ij","kl","d")
+	ix = n+2
+	# first pair is always : {2,1}
+	idx[[1]] = cumsum(c(ix, (n-1)*n, (n-1), (n+1)*(n-1)^2, (n-1), (n-1)*n))
+	for(i in 2:unique_pairs){
+		d = prs[i,3]
+		if(d == prs[i-1,3]){
+			i1 = idx[[i-1]][1]+n^3+n^2+n+1
+		} else{
+			i1 = ix+n+1
+			ix = i1
+		}
+		idx[[i]] = cumsum(c(i1, d*(n-1)*n, d*(n-1), d*(n+1)*(n-1)^2, d*(n-1), d*(n-1)*n))
 	}
-	for(i in 1:length(N)){
-		uq = unique(Z[i,])
-		ck[rw[i], N[i]] = sigma2[uq[1]]*sigma2[uq[2]]
-	}
-	# indx1 = by columns
-	indx1 = ((1:n)-1) * n^3  + ((1:n)-1) * n^2 + ((1:n)-1) * n + (1:n)
-	# indx2 = by row
-	ck[indx1] = kurtval
-	return(ck)
+	return(list(index = idx, pairs = prs))
 }
+
+.cokurt.ind = function(sigma2, kurtvals)
+{
+	n = length(sigma2)
+	x = .cokurt.pairs(n)
+	ix = ((1:n)-1) * n^3  + ((1:n)-1) * n^2 + ((1:n)-1) * n + (1:n)
+	z = rep(0, n*n^3)
+	z[ix] = kurtvals
+	for(i in 1:nrow(x$pairs)) z[x$index[[i]]] = sigma2[x$pairs[i,1]]*sigma2[x$pairs[i,2]]
+	cs = matrix(z, ncol = n^3, nrow = n)
+	return(cs)
+}
+
+
 
 .coskew.sigma = function(sigmas)
 {
@@ -486,7 +465,9 @@ ghypmvcf = function(z, lambda, alpha, beta, delta, mu)
 	idx2 = rep(sort(rep(1:n, n)), n)
 	idx3 = rep(1:n, n^2)
 	idx = cbind(idx1, idx2, idx3)
-	zs = apply(idx, 1, FUN = function(x) prod(sigmas[x]))
+	zs = as.numeric(.Call("gogarchcssigma", idx = as.matrix(idx-1), SS = as.numeric(sigmas),
+					PACKAGE = "rmgarch"))
+	# apply(idx, 1, FUN = function(x) prod(sigmas[x]))
 	cs = matrix(zs, ncol = n^2, nrow = n, byrow = TRUE)
 	return(cs)
 }
@@ -499,7 +480,9 @@ ghypmvcf = function(z, lambda, alpha, beta, delta, mu)
 	idx3 = rep(sort(rep(1:n, n)), n^2)
 	idx4 = rep(1:n, n^3)
 	idx = cbind(idx1, idx2, idx3, idx4)
-	zs = apply(idx, 1, FUN = function(x) prod(sigmas[x]))
+	zs = as.numeric(.Call("gogarchcksigma", idx = as.matrix(idx-1), SS = as.numeric(sigmas),
+					PACKAGE = "rmgarch"))
+	# zs = apply(idx, 1, FUN = function(x) prod(sigmas[x]))
 	cs = matrix(zs, ncol = n^3, nrow = n, byrow = TRUE)
 	return(cs)
 }

@@ -100,12 +100,12 @@ normal.dccLLH2 = function(pars, arglist)
 	# simulate new H with which to standardize the dataset
 	mspec = .makemultispec(umodel$modelinc, umodel$modeldesc$vmodel, umodel$modeldesc$vsubmodel, 
 			umodel$modeldata$mexdata, umodel$modeldata$vexdata, umodel$start.pars, 
-			umodel$fixed.pars, umodel$vt)
+			umodel$fixed.pars, NULL)
 	
 	for(i in 1:m){
 		specx = mspec@spec[[i]]
 		setfixed(specx) = as.list(mpars[which(midx[,i]==1), i])
-		flt = ugarchfilter(spec = specx, data = data[,i], out.sample = n.start)
+		flt = ugarchfilter(spec = specx, data = xts(data[,i], arglist$index[1:nrow(data)]), out.sample = n.start, realizedVol = arglist$realizedVol[1:nrow(data),i])
 		H[, i] = sigma(flt)
 		resids[,i] = residuals(flt)
 	}
@@ -200,7 +200,7 @@ normalfilter.dccLLH2 = function(pars, arglist)
 	for(i in 1:m){
 		specx = mspec@spec[[i]]
 		setfixed(specx) = as.list(mpars[which(midx[,i]==1), i])
-		flt = ugarchfilter(spec = specx, data = data[,i], out.sample = n.start, n.old = n.old)
+		flt = ugarchfilter(spec = specx, data =xts(data[,i], arglist$index[1:nrow(data)]), out.sample = n.start, n.old = n.old, realizedVol = arglist$realizedVol[1:nrow(data),i])
 		H[, i] = sigma(flt)
 		resids[,i] = residuals(flt)
 	}
@@ -338,12 +338,12 @@ student.dccLLH2 = function(pars, arglist)
 	# simulate new H with which to standardize the dataset
 	mspec = .makemultispec(umodel$modelinc, umodel$modeldesc$vmodel, umodel$modeldesc$vsubmodel, 
 			umodel$modeldata$mexdata, umodel$modeldata$vexdata, umodel$start.pars, 
-			umodel$fixed.pars, umodel$vt)
+			umodel$fixed.pars, NULL)
 	
 	for(i in 1:m){
 		specx = mspec@spec[[i]]
 		setfixed(specx) = as.list(mpars[which(midx[,i]==1), i])
-		flt = ugarchfilter(spec = specx, data = data[,i], out.sample = n.start)
+		flt = ugarchfilter(spec = specx, data = xts(data[,i], arglist$index[1:nrow(data)]), out.sample = n.start, realizedVol = arglist$realizedVol[1:nrow(data),i])
 		H[, i] = sigma(flt)
 		resids[,i] = residuals(flt)
 	}
@@ -432,7 +432,7 @@ studentfilter.dccLLH2 = function(pars, arglist)
 	for(i in 1:m){
 		specx = mspec@spec[[i]]
 		setfixed(specx) = as.list(mpars[which(midx[,i]==1), i])
-		flt = ugarchfilter(spec = specx, data = data[,i], out.sample = n.start, n.old = n.old)
+		flt = ugarchfilter(spec = specx, data = xts(data[,i], arglist$index[1:nrow(data)]), out.sample = n.start, n.old = n.old, realizedVol = arglist$realizedVol[1:nrow(data),i])
 		H[, i] = sigma(flt)
 		resids[,i] = residuals(flt)
 	}
@@ -570,12 +570,12 @@ laplace.dccLLH2 = function(pars, arglist)
 	# simulate new H with which to standardize the dataset
 	mspec = .makemultispec(umodel$modelinc, umodel$modeldesc$vmodel, umodel$modeldesc$vsubmodel, 
 			umodel$modeldata$mexdata, umodel$modeldata$vexdata, umodel$start.pars, 
-			umodel$fixed.pars, umodel$vt)
+			umodel$fixed.pars, NULL)
 	
 	for(i in 1:m){
 		specx = mspec@spec[[i]]
 		setfixed(specx) = as.list(mpars[which(midx[,i]==1), i])
-		flt = ugarchfilter(spec = specx, data = data[,i], out.sample = n.start)
+		flt = ugarchfilter(spec = specx, data = xts(data[,i], arglist$index[1:nrow(data)]), out.sample = n.start, realizedVol = arglist$realizedVol[1:nrow(data),i])
 		H[, i] = sigma(flt)
 		resids[,i] = residuals(flt)
 	}
@@ -665,7 +665,7 @@ laplacefilter.dccLLH2 = function(pars, arglist)
 	for(i in 1:m){
 		specx = mspec@spec[[i]]
 		setfixed(specx) = as.list(mpars[which(midx[,i]==1), i])
-		flt = ugarchfilter(spec = specx, data = data[,i], out.sample = n.start)
+		flt = ugarchfilter(spec = specx, data = xts(data[,i], arglist$index[1:nrow(data)]), out.sample = n.start, realizedVol = arglist$realizedVol[1:nrow(data),i])
 		H[, i] = sigma(flt)
 		resids[,i] = residuals(flt)
 	}

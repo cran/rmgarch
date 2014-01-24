@@ -656,8 +656,7 @@ setMethod("rcov", signature(object = "goGARCHfilter"), .rcovgarch)
 	sig = sigma(object)^2
 	n.roll = object@model$n.roll
 	n.ahead = object@model$n.ahead
-	# for dimensionality reduced systems
-	if(type == 1) m = NROW(A) else m = NCOL(A)
+	m = NCOL(A)
 	H = vector(mode = "list", length = n.roll+1)
 	T = object@model$modeldata$T
 	D = as.character(object@model$modeldata$index[T:(T+n.roll)])
@@ -774,7 +773,7 @@ setMethod("rcor", signature(object = "goGARCHfilter"), .rcorgarch)
 	sig = sigma(object)^2
 	n.roll = object@model$n.roll
 	n.ahead = object@model$n.ahead
-	m = NROW(A)
+	m = NCOL(A)
 	R = vector(mode = "list", length = n.roll+1)
 	T = object@model$modeldata$T
 	D = as.character(object@model$modeldata$index[T:(T+n.roll)])
@@ -852,7 +851,7 @@ rcoskew = function(object, ...)
 		roll = 1:(object@model$n.roll+1)
 		n.roll = object@model$n.roll+1
 		D3 = dimnames(sig<-sigma(object))[[3]][roll]
-		sig = matrix(sig[from:to,,roll], ncol = m, byrow=TRUE)
+		sig = matrix(sig[from:to,,roll], ncol = NCOL(A), byrow=TRUE)
 		mdist = object@model$modeldesc$distribution
 		if(mdist == "mvnorm") stop("\nNo co-skewness for mvnorm distribution\n", call. = FALSE)
 		xs = array(NA, dim = c(m , m^2, n.roll))
@@ -867,7 +866,13 @@ rcoskew = function(object, ...)
 		# convert to moments since the standardized moments do not retain their 
 		# geometric properties in transformation
 		yskew = matrix(S3, ncol = NCOL(sig), nrow = NROW(sig), byrow = TRUE)*(sig^3)
-		xs = .Call("gogarchCS", S = yskew, A = A, PACKAGE = "rmgarch")
+		Z = as(t(A), "dgeMatrix")
+		rhs = list(Matrix(t(A)), Z)
+		for(i in 1:n.roll){
+			K = .coskew.ind(yskew[i,])
+			lhs = A%*%K
+			xs[,,i] = fast_kron_M(rhs, lhs, m, p=2)
+		}		
 		if(standardize){
 			for(i in 1:n.roll){
 				SD = sqrt(diag(A%*%diag(sig[i,]^2)%*%t(A)))
@@ -887,10 +892,10 @@ rcoskew = function(object, ...)
 			if(to>n.ahead)   stop("\nto>n.ahead!")
 			D3 = dimnames(sig<-sigma(object))[[3]][roll+1]
 			D1 = rownames(sig[from:to,,roll+1,drop=FALSE])
-			sig = matrix(sig[from:to,,roll+1], ncol = m, byrow=TRUE)
+			sig = matrix(sig[from:to,,roll+1], ncol = NCOL(A), byrow=TRUE)
 		} else{
 			D1 = as.character(index(sig<-sigma(object)))[from:to]
-			sig = matrix(sigma(object)[from:to,,], ncol = m, byrow=TRUE)
+			sig = matrix(sigma(object)[from:to,,], ncol = NCOL(A), byrow=TRUE)
 		}
 		mdist = object@model$modeldesc$distribution
 		if(mdist == "mvnorm") stop("\nNo co-skewness for mvnorm distribution\n", call. = FALSE)
@@ -908,7 +913,13 @@ rcoskew = function(object, ...)
 		# convert to moments since the standardized moments do not retain their 
 		# geometric properties in transformation
 		yskew = matrix(S3, ncol = NCOL(sig), nrow = NROW(sig), byrow = TRUE)*(sig^3)
-		xs = .Call("gogarchCS", S = yskew, A = A, PACKAGE = "rmgarch")
+		Z = as(t(A), "dgeMatrix")
+		rhs = list(Matrix(t(A)), Z)
+		for(i in 1:n){
+			K = .coskew.ind(yskew[i,])
+			lhs = A%*%K
+			xs[,,i] = fast_kron_M(rhs, lhs, m, p=2)
+		}
 		if(standardize){
 			for(i in 1:n){
 				SD = sqrt(diag(A%*%diag(sig[i,]^2)%*%t(A)))
@@ -975,7 +986,13 @@ setMethod("rcoskew", signature(object = "goGARCHroll"), .rcoskewroll)
 	# convert to moments as since the standardized moments do not retain their geometric properties in transformation
 	sig = sig[from:to,,drop = FALSE]
 	yskew = matrix(S3, ncol = NCOL(sig), nrow = NROW(sig), byrow = TRUE)*(sig^3)
-	xs = .Call("gogarchCS", S = yskew, A = A, PACKAGE = "rmgarch")
+	Z = as(t(A), "dgeMatrix")
+	rhs = list(Matrix(t(A)), Z)
+	for(i in 1:n){
+		K = .coskew.ind(yskew[i,])
+		lhs = A%*%K
+		xs[,,i] = fast_kron_M(rhs, lhs, m, p=2)
+	}
 	if(standardize){
 		for(i in 1:n){
 			SD = sqrt(diag(A%*%diag(sig[i,]^2)%*%t(A)))
@@ -1005,7 +1022,7 @@ rcokurt = function(object, ...)
 		roll = 1:(object@model$n.roll+1)
 		n.roll = object@model$n.roll+1
 		D3 = dimnames(sig<-sigma(object))[[3]][roll]
-		sig = matrix(sig[from:to,,roll], ncol = m, byrow = TRUE)
+		sig = matrix(sig[from:to,,roll], ncol = NCOL(A), byrow = TRUE)
 		mdist = object@model$modeldesc$distribution
 		if(mdist == "mvnorm") stop("\nNo co-skewness for mvnorm distribution\n", call. = FALSE)
 		xs = array(NA, dim = c(m , m^3, n.roll))
@@ -1020,7 +1037,13 @@ rcokurt = function(object, ...)
 		# convert to moments since the standardized moments do not retain their 
 		# geometric properties in transformation
 		ykurt = matrix(S4, ncol = NCOL(sig), nrow = NROW(sig), byrow = TRUE)*(sig^4)
-		xs = .Call("gogarchCK", K = ykurt, S = sig^2, A = A, PACKAGE="rmgarch")
+		Z = as(kronecker(t(A), t(A)), "dgeMatrix")
+		rhs = list(Matrix(t(A)), Z)
+		for(i in 1:n.roll){
+			K = .cokurt.ind(sig[i,]^2, ykurt[i,])
+			lhs = A%*%K
+			xs[,,i] = fast_kron_M(rhs, lhs, m, p=3)
+		}
 		if(standardize){
 			for(i in 1:n.roll){
 				SD = sqrt(diag(A%*%diag(sig[i,]^2)%*%t(A)))
@@ -1040,10 +1063,10 @@ rcokurt = function(object, ...)
 			if(to>n.ahead)   stop("\nto>n.ahead!")
 			D3 = dimnames(sig<-sigma(object))[[3]][roll+1]
 			D1 = rownames(sig[from:to,,roll+1,drop=FALSE])
-			sig = matrix(sig[from:to,,roll+1], ncol = m, byrow=TRUE)
+			sig = matrix(sig[from:to,,roll+1], ncol = NCOL(A), byrow=TRUE)
 		} else{
 			D1 = as.character(index(sig<-sigma(object)))[from:to]
-			sig = matrix(sig[from:to,,], ncol = m, byrow=TRUE)
+			sig = matrix(sig[from:to,,], ncol = NCOL(A), byrow=TRUE)
 		}
 		if(from>to)      stop("\nfrom>to!")
 		mdist = object@model$modeldesc$distribution
@@ -1064,7 +1087,13 @@ rcokurt = function(object, ...)
 		}
 		# convert to moments as since the standardized moments do not retain their geometric properties in transformation
 		ykurt = matrix(S4, ncol = NCOL(sig), nrow = NROW(sig), byrow = TRUE)*(sig^4)
-		xs = .Call("gogarchCK", K = ykurt, S = sig^2, A = A, PACKAGE="rmgarch")
+		Z = as(kronecker(t(A), t(A)), "dgeMatrix")
+		rhs = list(Matrix(t(A)), Z)
+		for(i in 1:n){
+			K = .cokurt.ind(sig[i,]^2, ykurt[i,])
+			lhs = A%*%K
+			xs[,,i] = fast_kron_M(rhs, lhs, m, p=3)
+		}
 		if(standardize){
 			for(i in 1:n){
 				SD = sqrt(diag(A%*%diag(sig[i,]^2)%*%t(A)))
@@ -1131,7 +1160,13 @@ setMethod("rcokurt", signature(object = "goGARCHroll"), .rcokurtroll)
 	# convert to moments as since the standardized moments do not retain their geometric properties in transformation
 	sig = sig[from:to,,drop = FALSE]
 	ykurt = matrix(S4, ncol = NCOL(sig), nrow = NROW(sig), byrow = TRUE)*(sig^4)
-	xs = .Call("gogarchCK", K = ykurt, S = sig^2, A = A, PACKAGE="rmgarch")
+	Z = as(kronecker(t(A), t(A)), "dgeMatrix")
+	rhs = list(Matrix(t(A)), Z)
+	for(i in 1:n){
+		K = .cokurt.ind(sig[i,]^2, ykurt[i,])
+		lhs = A%*%K
+		xs[,,i] = fast_kron_M(rhs, lhs, m, p=3)
+	}	
 	if(standardize){
 		for(i in 1:n){
 			SD = sqrt(diag(A%*%diag(sig[i,]^2)%*%t(A)))
@@ -1360,6 +1395,9 @@ setMethod("nportmoments", signature(object = "goGARCHfft"), .nportmoments)
 			if(is.na(m1)){
 				nmom[i,2:4] = NA
 			} else{
+				fm1 = function(x) x * dmad(x)
+				# its more accurate to evaluate m1
+				m1 = integrate(fm1, -Inf, Inf, subdivisions = subdivisions, rel.tol = rel.tol, stop.on.error = FALSE)$value
 				fm2 = function(x) ((x-m1)^2) * dmad(x)
 				nmom[i,2] = sqrt(integrate(fm2, -Inf, Inf, subdivisions = subdivisions, rel.tol = rel.tol, stop.on.error = FALSE)$value)
 				fm3 = function(x) ((x-m1)^3) * dmad(x)
@@ -1510,7 +1548,7 @@ setMethod("convolution", signature(object = "goGARCHfilter"), .convolution)
 	} else{
 		m = dim(M2[[1]])[2]
 		M2 = array(sapply(M2, function(x) x[,,1]), dim=c(m, m, n.roll+1))
-		M1 = matrix(M1, ncol = m, nrow = n.roll+1, byrow=TRUE)
+		M1 = matrix(M1, ncol = NROW(A), nrow = n.roll+1, byrow=TRUE)
 	}
 	support.method = support.method[1]
 	model = object@model
@@ -1769,10 +1807,10 @@ setMethod("convolution", signature(object = "goGARCHroll"), .convolution.gogarch
 		}
 		if( !is.null(cluster) ){
 			clusterEvalQ(cluster, require(rmgarch))
-			clusterExport(cluster, c("zz", "fft.step", "wpars"), 
+			clusterExport(cluster, c("zz", "fft.step", "wpars","cfinv","nigmvcf"), 
 					envir = environment())
 			xpdf = parLapply(cluster, as.list(1:n), fun = function(i){
-						rmgarch:::cfinv(z = zz, f = rmgarch:::nigmvcf, 
+						cfinv(z = zz, f = nigmvcf, 
 								step = fft.step, alpha = wpars[,1,i], 
 								beta = wpars[,2,i], delta = wpars[,3,i], 
 								mu = wpars[,4,i])
@@ -1792,7 +1830,7 @@ setMethod("convolution", signature(object = "goGARCHroll"), .convolution.gogarch
 		support.user = matrix(NA, ncol = 2, nrow = n)
 		if( !is.null(cluster) ){
 			clusterEvalQ(cluster, require(rmgarch))
-			clusterExport(cluster, c("fft.step", "fft.by", "wpars"), envir = environment())
+			clusterExport(cluster, c("fft.step", "fft.by", "wpars","cfinv","nigmvcf"), envir = environment())
 			xsol = parLapply(cluster, as.list(1:n), fun = function(i){
 						xmin = min(apply(cbind(wpars[,1,i], wpars[,2,i], wpars[,3,i], wpars[,4,i]), 1, 
 										FUN = function(x) rugarch:::qnig(0.0000001, 
@@ -1803,7 +1841,7 @@ setMethod("convolution", signature(object = "goGARCHroll"), .convolution.gogarch
 													alpha = x[1], beta = x[2], 
 													delta = x[3], mu = x[4])))
 						zz = seq(xmin, xmax, by = fft.by)
-						ans = rmgarch:::cfinv(z = zz, f = rmgarch:::nigmvcf, 
+						ans = cfinv(z = zz, f = nigmvcf, 
 								step = fft.step, alpha = wpars[,1,i], 
 								beta = wpars[,2,i], delta = wpars[,3,i], 
 								mu = wpars[,4,i])
@@ -1898,10 +1936,10 @@ setMethod("convolution", signature(object = "goGARCHroll"), .convolution.gogarch
 		}
 		if( !is.null(cluster) ){
 			clusterEvalQ(cluster, require(rmgarch))
-			clusterExport(cluster, c("zz", "fft.step", "wpars"), 
+			clusterExport(cluster, c("zz", "fft.step", "wpars","cfinv","ghypmvcf"), 
 					envir = environment())
 			xpdf = parLapply(cluster, 1:n, fun = function(i){
-						rmgarch:::cfinv(z = zz, f = rmgarch:::ghypmvcf, 
+						cfinv(z = zz, f = ghypmvcf, 
 								step = fft.step, lambda = wpars[,5,i], 
 								alpha = wpars[,1,i], beta = wpars[,2,i], 
 								delta = wpars[,3,i], mu = wpars[,4,i])
@@ -1921,7 +1959,7 @@ setMethod("convolution", signature(object = "goGARCHroll"), .convolution.gogarch
 		if( !is.null(cluster) ){
 			clusterEvalQ(cluster, require(rmgarch))
 			clusterExport(cluster, c("zz", "fft.step", "fft.by", 
-							"wpars"), envir = environment())
+							"wpars","cfinv","ghypmvcf"), envir = environment())
 			xsol = parLapply(cluster, as.list(1:n), fun = function(i){
 						xmin = min(apply(cbind(wpars[,1,i], wpars[,2,i], wpars[,3,i], wpars[,4,i], wpars[,5,i]), 1, 
 										FUN = function(x) rugarch:::qgh(0.0000001, 
@@ -1934,7 +1972,7 @@ setMethod("convolution", signature(object = "goGARCHroll"), .convolution.gogarch
 													delta = x[3], mu = x[4], 
 													lambda = x[5])))
 						zz = seq(xmin, xmax, by = fft.by)
-						ans = rmgarch:::cfinv(z = zz, f = rmgarch:::ghypmvcf, 
+						ans = cfinv(z = zz, f = ghypmvcf, 
 								step = fft.step, lambda = wpars[,5,i], 
 								alpha = wpars[,1,i], beta = wpars[,2,i], 
 								delta = wpars[,3,i], mu = wpars[,4,i])
@@ -2201,6 +2239,320 @@ setMethod("nisurface", signature(object = "goGARCHfilter"), .newsimpact.gogarch)
 	}
 	return(list(nisurface = ni, axis = zeps))
 }
+
+#--------------------------------------------------------------------------------
+
+betacovar = function(object, ...)
+{
+	UseMethod("betacovar")
+}
+
+.betacovar.fit = function(object, weights, asset = 1)
+{
+	A = as.matrix(object, which = "A")
+	m = NROW(A)
+	sig = as.matrix(sigma(object))
+	n = NROW(sig)
+	if(is.vector(weights)){
+		if(length(weights) != m) stop("\nIncorrect weight vector length\n", call. = FALSE)
+		weights = matrix(weights, ncol = m, nrow = n, byrow = TRUE)
+	} else if(is.matrix(weights)){
+		nn = NROW(weights)
+		mm = NCOL(weights)
+		if(mm != m) stop("\nIncorrect column dimension for weights matrix\n", call. = FALSE)
+		if(nn != n) stop("\nIncorrect row dimension for weights matrix\n", call. = FALSE)
+	}
+	V = rcov(object)
+	d = c(dim(V), asset-1)
+	b = .Call("tvbetacovar", wi = weights, V_ = V, di = as.integer(d), PACKAGE="rmgarch")
+	b = xts(b, object@model$modeldata$index[1:object@model$modeldata$T])
+	colnames(b) = object@model$modeldata$asset.names[asset]
+	return(b)
+}
+
+# TODO: methods for forecast and simulation
+
+setMethod("betacovar", signature(object = "goGARCHfit"), .betacovar.fit)
+setMethod("betacovar", signature(object = "goGARCHfilter"), .betacovar.fit)
+
+.betacovar.forecast = function(object, weights, asset = 1)
+{
+	A = as.matrix(object, which = "A")
+	m = NROW(A)
+	sig = sigma(object)
+	if(object@model$n.roll>0){
+		n = object@model$n.roll+1
+	} else{
+		n = object@model$n.ahead
+	}
+	if(is.vector(weights)){
+		if(length(weights) != m) stop("\nIncorrect weight vector length\n", call. = FALSE)
+		weights = matrix(weights, ncol = m, nrow = n, byrow = TRUE)
+	} else if(is.matrix(weights)){
+		nn = NROW(weights)
+		mm = NCOL(weights)
+		if(mm != m) stop("\nIncorrect column dimension for weights matrix\n", call. = FALSE)
+		if(nn != n) stop("\nIncorrect row dimension for weights matrix\n", call. = FALSE)
+	}
+	V = array(unlist(rcov(object)), dim = c(m,m,n))
+	d = c(dim(V), asset-1)
+	b = .Call("tvbetacovar", wi = weights, V_ = V, di = as.integer(d), PACKAGE="rmgarch")
+	if(object@model$n.roll>0){
+		b = xts(b, as.POSIXct(dimnames(fitted(object))[[3]]))
+		colnames(b)<-paste(object@model$modeldata$asset.names[asset],"[T+1]",sep="")
+	} else{
+		b = matrix(b, ncol = 1)
+		rownames(b) = dimnames(fitted(object))[[1]]
+		colnames(b) = paste(object@model$modeldata$asset.names[asset],"[T0=",dimnames(fitted(object))[[3]],"]",sep="")
+	}
+	return(b)
+}
+setMethod("betacovar", signature(object = "goGARCHforecast"), .betacovar.forecast)
+#--------------------------------------------------------------------------------
+betacoskew = function(object, ...)
+{
+	UseMethod("betacoskew")
+}
+
+
+.betacoskew.fit = function(object, weights, asset = 1, cluster = NULL)
+{
+	A = as.matrix(object, which = "A")
+	m = NROW(A)
+	sig = as.matrix(sigma(object))
+	n = NROW(sig)
+	if(is.vector(weights)){
+		if(length(weights) != m) stop("\nIncorrect weight vector length\n", call. = FALSE)
+		weights = matrix(weights, ncol = m, nrow = n, byrow = TRUE)
+	} else if(is.matrix(weights)){
+		nn = NROW(weights)
+		mm = NCOL(weights)
+		if(mm != m) stop("\nIncorrect column dimension for weights matrix\n", call. = FALSE)
+		if(nn != n) stop("\nIncorrect row dimension for weights matrix\n", call. = FALSE)
+	}
+	if(n<100){
+		idx = cbind(1, n)
+		k = 1
+	} else{
+		idx1 = seq(1, n, by = 50)
+		if(idx1[length(idx1)]!=n) idx1 = c(idx1, n)			
+		idx1 = idx1[-1]
+		idx2 = c(1, idx1[-length(idx1)]+1)
+		idx = cbind(idx2, idx1)
+		k = NROW(idx)
+	}
+	b = rep(0, n)
+	if(!is.null(cluster)){
+		clusterExport(cluster, c("object","idx","asset","weights"), envir = environment())
+		clusterEvalQ(cluster, library(rmgarch))
+		ans = parLapply(cluster, 1:k, function(i){
+			S = rcoskew(object, from = idx[i,1], to = idx[i,2], standardize = FALSE)
+			d = c(dim(S), asset-1)
+			sol = as.numeric( .Call("tvbetacoskew", wi = weights[idx[i,1]:idx[i,2],,drop=FALSE], Si = S, di = as.integer(d), PACKAGE="rmgarch") )
+			return(sol)
+			})
+		for(i in 1:k) b[idx[i,1]:idx[i,2]] = ans[[i]]
+	} else{
+		for(i in 1:k){
+			S = rcoskew(object, from = idx[i,1], to = idx[i,2], standardize = FALSE)
+			d = c(dim(S), asset-1)
+			b[idx[i,1]:idx[i,2]] = as.numeric( .Call("tvbetacoskew", wi = weights[idx[i,1]:idx[i,2],,drop=FALSE], Si = S, di = as.integer(d), PACKAGE="rmgarch") )
+		}
+	}
+	b = xts(b, object@model$modeldata$index[1:object@model$modeldata$T])
+	colnames(b) = object@model$modeldata$asset.names[asset]
+	return(b)
+}
+
+setMethod("betacoskew", signature(object = "goGARCHfit"), .betacoskew.fit)
+setMethod("betacoskew", signature(object = "goGARCHfilter"), .betacoskew.fit)
+
+.betacoskew.forecast = function(object, weights, asset = 1)
+{
+	A = as.matrix(object, which = "A")
+	m = NROW(A)
+	sig = sigma(object)
+	if(object@model$n.roll>0){
+		n = object@model$n.roll+1
+		useroll = TRUE
+	} else{
+		n = object@model$n.ahead
+		useroll = FALSE
+		if(n<100){
+			idx = cbind(1, n)
+			k = 1
+		} else{
+			idx1 = seq(1, n, by = 50)
+			if(idx1[length(idx1)]!=n) idx1 = c(idx1, n)			
+			idx1 = idx1[-1]
+			idx2 = c(1, idx1[-length(idx1)]+1)
+			idx = cbind(idx2, idx1)
+			k = NROW(idx)
+		}
+	}
+	if(is.vector(weights)){
+		if(length(weights) != m) stop("\nIncorrect weight vector length\n", call. = FALSE)
+		weights = matrix(weights, ncol = m, nrow = n, byrow = TRUE)
+	} else if(is.matrix(weights)){
+		nn = NROW(weights)
+		mm = NCOL(weights)
+		if(mm != m) stop("\nIncorrect column dimension for weights matrix\n", call. = FALSE)
+		if(nn != n) stop("\nIncorrect row dimension for weights matrix\n", call. = FALSE)
+	}
+	b = rep(0, n)
+	if(useroll){
+		if(n<100){
+			S = rcoskew(object, from = 1, to = 1, roll = "all", standardize = FALSE)
+			d = c(dim(S), asset-1)
+			b = as.numeric( .Call("tvbetacoskew", wi = weights, Si = S, di = as.integer(d), PACKAGE="rmgarch") )
+		} else{
+			for(i in 1:n){
+				S = rcoskew(object, from = 1, to = 1, roll = i-1, standardize = FALSE)
+				d = c(dim(S), asset-1)
+				b[i] = as.numeric( .Call("tvbetacoskew", wi = weights[i,,drop=FALSE], Si = S, di = as.integer(d), PACKAGE="rmgarch") )
+			}
+		}
+	} else{
+		for(i in 1:k){
+			S = rcoskew(object, from = idx[i,1], to = idx[i,2], roll=0, standardize = FALSE)
+			d = c(dim(S), asset-1)
+			b[idx[i,1]:idx[i,2]] = as.numeric( .Call("tvbetacoskew", wi = weights[idx[i,1]:idx[i,2],,drop=FALSE], Si = S, di = as.integer(d), PACKAGE="rmgarch") )
+		}
+	}
+	if(object@model$n.roll>0){
+		b = xts(b, as.POSIXct(dimnames(fitted(object))[[3]]))
+		colnames(b)<-paste(object@model$modeldata$asset.names[asset],"[T+1]",sep="")
+	} else{
+		b = matrix(b, ncol = 1)
+		rownames(b) = dimnames(fitted(object))[[1]]
+		colnames(b) = paste(object@model$modeldata$asset.names[asset],"[T0=",dimnames(fitted(object))[[3]],"]",sep="")
+	}
+	return(b)
+}
+
+setMethod("betacoskew", signature(object = "goGARCHforecast"), .betacoskew.forecast)
+#--------------------------------------------------------------------------------
+betacokurt = function(object, ...)
+{
+	UseMethod("betacokurt")
+}
+.betacokurt.fit = function(object, weights, asset = 1, cluster = NULL)
+{
+	A = as.matrix(object, which = "A")
+	m = NROW(A)
+	sig = as.matrix(sigma(object))
+	n = NROW(sig)
+	if(is.vector(weights)){
+		if(length(weights) != m) stop("\nIncorrect weight vector length\n", call. = FALSE)
+		weights = matrix(weights, ncol = m, nrow = n, byrow = TRUE)
+	} else if(is.matrix(weights)){
+		nn = NROW(weights)
+		mm = NCOL(weights)
+		if(mm != m) stop("\nIncorrect column dimension for weights matrix\n", call. = FALSE)
+		if(nn != n) stop("\nIncorrect row dimension for weights matrix\n", call. = FALSE)
+	}
+	if(n<100){
+		idx = cbind(1, n)
+		k = 1
+	} else{
+		idx1 = seq(1, n, by = 50)
+		if(idx1[length(idx1)]!=n) idx1 = c(idx1, n)			
+		idx1 = idx1[-1]
+		idx2 = c(1, idx1[-length(idx1)]+1)
+		idx = cbind(idx2, idx1)
+		k = NROW(idx)
+	}
+	b = rep(0, n)
+	
+	if(!is.null(cluster)){
+		clusterExport(cluster, c("object","idx","asset","weights"), envir = environment())
+		clusterEvalQ(cluster, library(rmgarch))
+		ans = parLapply(cluster, 1:k, function(i){
+					K = rcokurt(object, from = idx[i,1], to = idx[i,2], standardize = FALSE)
+					d = c(dim(K), asset-1)
+					sol = as.numeric( .Call("tvbetacokurt", wi = weights[idx[i,1]:idx[i,2],,drop=FALSE], Ki = K, di = as.integer(d), PACKAGE="rmgarch") )
+					return(sol)
+				})
+		for(i in 1:k) b[idx[i,1]:idx[i,2]] = ans[[i]]
+	} else{
+		for(i in 1:k){
+			K = rcokurt(object, from = idx[i,1], to = idx[i,2], standardize = FALSE)
+			d = c(dim(K), asset-1)
+			b[idx[i,1]:idx[i,2]] = as.numeric( .Call("tvbetacokurt", wi = weights[idx[i,1]:idx[i,2],,drop=FALSE], Ki = K, di = as.integer(d), PACKAGE="rmgarch") )
+		}
+	}
+	b = xts(b, object@model$modeldata$index[1:object@model$modeldata$T])
+	colnames(b) = object@model$modeldata$asset.names[asset]
+	return(b)
+}
+
+setMethod("betacokurt", signature(object = "goGARCHfit"), .betacokurt.fit)
+setMethod("betacokurt", signature(object = "goGARCHfilter"), .betacokurt.fit)
+
+
+.betacokurt.forecast = function(object, weights, asset = 1)
+{
+	A = as.matrix(object, which = "A")
+	m = NROW(A)
+	sig = sigma(object)
+	if(object@model$n.roll>0){
+		n = object@model$n.roll+1
+		useroll = TRUE
+	} else{
+		n = object@model$n.ahead
+		useroll = FALSE
+		if(n<100){
+			idx = cbind(1, n)
+			k = 1
+		} else{
+			idx1 = seq(1, n, by = 50)
+			if(idx1[length(idx1)]!=n) idx1 = c(idx1, n)			
+			idx1 = idx1[-1]
+			idx2 = c(1, idx1[-length(idx1)]+1)
+			idx = cbind(idx2, idx1)
+			k = NROW(idx)
+		}
+	}
+	if(is.vector(weights)){
+		if(length(weights) != m) stop("\nIncorrect weight vector length\n", call. = FALSE)
+		weights = matrix(weights, ncol = m, nrow = n, byrow = TRUE)
+	} else if(is.matrix(weights)){
+		nn = NROW(weights)
+		mm = NCOL(weights)
+		if(mm != m) stop("\nIncorrect column dimension for weights matrix\n", call. = FALSE)
+		if(nn != n) stop("\nIncorrect row dimension for weights matrix\n", call. = FALSE)
+	}
+	b = rep(0, n)
+	if(useroll){
+		if(n<50){
+			K = rcokurt(object, from = 1, to = 1, roll = "all", standardize = FALSE)
+			d = c(dim(K), asset-1)
+			b = as.numeric( .Call("tvbetacokurt", wi = weights, Ki = K, di = as.integer(d), PACKAGE="rmgarch") )
+		} else{
+			for(i in 1:n){
+				K = rcokurt(object, from = 1, to = 1, roll = i-1, standardize = FALSE)
+				d = c(dim(K), asset-1)
+				b[i] = as.numeric( .Call("tvbetacokurt", wi = weights[i,,drop=FALSE], Ki = K, di = as.integer(d), PACKAGE="rmgarch") )
+			}
+		}
+	} else{
+		for(i in 1:k){
+			K = rcokurt(object, from = idx[i,1], to = idx[i,2], roll=0, standardize = FALSE)
+			d = c(dim(K), asset-1)
+			b[idx[i,1]:idx[i,2]] = as.numeric( .Call("tvbetacokurt", wi = weights[idx[i,1]:idx[i,2],,drop=FALSE], Ki = K, di = as.integer(d), PACKAGE="rmgarch") )
+		}
+	}
+	if(object@model$n.roll>0){
+		b = xts(b, as.POSIXct(dimnames(fitted(object))[[3]]))
+		colnames(b)<-paste(object@model$modeldata$asset.names[asset],"[T+1]",sep="")
+	} else{
+		b = matrix(b, ncol = 1)
+		rownames(b) = dimnames(fitted(object))[[1]]
+		colnames(b) = paste(object@model$modeldata$asset.names[asset],"[T0=",dimnames(fitted(object))[[3]],"]",sep="")
+	}
+	return(b)
+}
+setMethod("betacokurt", signature(object = "goGARCHforecast"), .betacokurt.forecast)
 
 #-----------------------------------------------------------------------------
 .abind = function (x, y) 

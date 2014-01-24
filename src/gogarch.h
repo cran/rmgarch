@@ -16,19 +16,19 @@
 #################################################################################*/
 #ifndef _gogarch_H
 #define _gogarch_H
-#include <R.h>
-#include <Rmath.h>
-#include <math.h>
 #include <RcppArmadillo.h>
+RcppExport SEXP tvbetacovar(SEXP wi, SEXP Vi, SEXP di);
+RcppExport SEXP tvbetacoskew(SEXP wi, SEXP Si, SEXP di);
+RcppExport SEXP tvbetacokurt(SEXP wi, SEXP Ki, SEXP di);
 RcppExport SEXP gogarchSigma(SEXP S, SEXP A);
 RcppExport SEXP gogarchCov(SEXP S, SEXP A);
 RcppExport SEXP gogarchCor(SEXP S, SEXP A);
-RcppExport SEXP gogarchCS(SEXP S, SEXP A);
-RcppExport SEXP gogarchCK(SEXP K, SEXP S, SEXP A);
 RcppExport SEXP Cov2Cor(SEXP , SEXP );
 RcppExport SEXP ArrayDiag(SEXP , SEXP );
 RcppExport SEXP Cov2Res(SEXP , SEXP , SEXP );
 RcppExport SEXP RowApplySort(SEXP );
 RcppExport SEXP RowUnique(SEXP );
+RcppExport SEXP gogarchcssigma(SEXP , SEXP );
+RcppExport SEXP gogarchcksigma(SEXP , SEXP );
 arma::mat coskewind( arma::rowvec );
 #endif
