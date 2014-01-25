@@ -18,6 +18,74 @@
 #include "gogarch.h"
 using namespace Rcpp;
 
+SEXP tvbetacovar(SEXP wi, SEXP Vi, SEXP di)
+{
+	try {
+	NumericVector CV(Vi);
+	int *d = INTEGER(di);
+	arma::cube V(CV.begin(), d[0], d[1], d[2]);
+	arma::mat w = as<arma::mat>(wi);
+	arma::vec A(d[2]);
+	int i;
+	for(i=0;i<d[2];i++){
+		arma::mat temp = V.slice(i);
+		A(i) = arma::as_scalar(w.row(i) * arma::trans(temp.row(d[3])))/arma::as_scalar(w.row(i) * temp * arma::trans(w.row(i))) ;
+	}
+	return wrap( A );
+	} catch( std::exception &ex ) {
+		forward_exception_to_r( ex );
+	} catch(...) {
+		::Rf_error( "rmgarch-->GOGARCH beta covariance extractor c++ exception (unknown reason)" );
+	}
+	return R_NilValue;
+}
+
+SEXP tvbetacoskew(SEXP wi, SEXP Si, SEXP di)
+{
+	try {
+	NumericVector CS(Si);
+	int *d = INTEGER(di);
+	arma::cube S(CS.begin(), d[0], d[1], d[2]);
+	arma::mat w = as<arma::mat>(wi);
+	arma::vec A(d[2]);
+	int i;
+	for(i=0;i<d[2];i++){
+		arma::vec ww = arma::trans(arma::kron(w.row(i), w.row(i)));
+		arma::mat stemp = S.slice(i);
+		A(i) = arma::as_scalar(stemp.row(d[3]) * ww)/arma::as_scalar(w.row(i) *stemp * ww);
+	}
+	return wrap( A );
+	} catch( std::exception &ex ) {
+	forward_exception_to_r( ex );
+	} catch(...) {
+	::Rf_error( "rmgarch-->GOGARCH beta coskew extractor c++ exception (unknown reason)" );
+	}
+	return R_NilValue;
+}
+
+SEXP tvbetacokurt(SEXP wi, SEXP Ki, SEXP di)
+{
+	try {
+	NumericVector CK(Ki);
+	int *d = INTEGER(di);
+	arma::cube K(CK.begin(), d[0], d[1], d[2]);
+	arma::mat w = as<arma::mat>(wi);
+	arma::vec A(d[2]);
+	int i;
+	for(i=0;i<d[2];i++){
+		arma::vec ww = arma::trans(arma::kron(w.row(i), arma::kron(w.row(i), w.row(i))));
+		arma::mat ktemp = K.slice(i);
+		A(i) = arma::as_scalar(ktemp.row(d[3]) * ww)/arma::as_scalar(w.row(i) *ktemp * ww);
+	}
+	return wrap( A );
+	} catch( std::exception &ex ) {
+	forward_exception_to_r( ex );
+	} catch(...) {
+	::Rf_error( "rmgarch-->GOGARCH beta cokurt extractor c++ exception (unknown reason)" );
+	}
+	return R_NilValue;
+}
+
 SEXP gogarchSigma(SEXP S, SEXP A)
 {
 	try{
@@ -26,7 +94,7 @@ SEXP gogarchSigma(SEXP S, SEXP A)
 		int m = RS.ncol(), n = RS.nrow(), mm = RA.ncol(), mn = RA.nrow(), i;
 		arma::mat AS(RS.begin(), n, m, true);
 		arma::mat AA(RA.begin(), mn, mm, true);
-		arma::mat S(n, m);
+		arma::mat S(n, mn);
 		for(i=0;i<n;i++){
 			S.row(i) = arma::trans(arma::diagvec(AA * arma::diagmat(AS.row(i))*AA.t()));
 		}
@@ -47,7 +115,7 @@ SEXP gogarchCov(SEXP S, SEXP A)
 		int m = RS.ncol(), n = RS.nrow(), mm = RA.ncol(), mn = RA.nrow(), i;
 		arma::mat AS(RS.begin(), n, m, true);
 		arma::mat AA(RA.begin(), mn, mm, true);
-		arma::cube S(m, m, n);
+		arma::cube S(mn, mn, n);
 		for(i=0;i<n;i++){
 			S.slice(i) = AA * arma::diagmat(AS.row(i))*AA.t();
 		}
@@ -68,7 +136,7 @@ SEXP gogarchCor(SEXP S, SEXP A)
 		int m = RS.ncol(), n = RS.nrow(), mm = RA.ncol(), mn = RA.nrow(), i;
 		arma::mat AS(RS.begin(), n, m, true);
 		arma::mat AA(RA.begin(), mn, mm, true);
-		arma::cube S(m, m, n);
+		arma::cube S(mn, mn, n);
 		for(i=0;i<n;i++){
 			arma::mat tmp1 = AA * arma::diagmat(AS.row(i))*AA.t();
 			arma::mat tmp2 = arma::diagmat(1/arma::sqrt(diagvec(tmp1)));
@@ -83,109 +151,6 @@ SEXP gogarchCor(SEXP S, SEXP A)
 	return R_NilValue;
 }
 
-SEXP gogarchCS(SEXP S, SEXP A)
-{
-	try{
-		Rcpp::NumericMatrix RS(S);
-		Rcpp::NumericMatrix RA(A);
-		int m = RS.ncol(), n = RS.nrow(), mm = RA.ncol(), mn = RA.nrow(), i;
-		arma::mat AS(RS.begin(), n, m, true);
-		arma::mat AA(RA.begin(), mn, mm, true);
-		arma::cube S(m, m*m, n);
-		arma::mat KA = kron(AA.t(), AA.t());
-		for(i=0;i<n;i++){
-			arma::mat tmp = coskewind(AS.row(i));
-			S.slice(i) = AA * tmp * KA;
-		}
-		return wrap( S );
-	} catch( std::exception &ex ) {
-		forward_exception_to_r( ex );
-	} catch(...) {
-		::Rf_error( "rmgarch-->gogarch extractor c++ exception (unknown reason)" );
-	}
-	return R_NilValue;
-}
-
-SEXP gogarchCK(SEXP K, SEXP S, SEXP A){
-	try{
-		Rcpp::NumericMatrix RK(K);
-		Rcpp::NumericMatrix RS(S);
-		Rcpp::NumericMatrix RA(A);
-		int m = RS.ncol(), n = RS.nrow(), mm = RA.ncol(), mn = RA.nrow(), i, j;
-		arma::mat AS(RS.begin(), n, m, true);
-		arma::mat AK(RK.begin(), n, m, true);
-		arma::mat AA(RA.begin(), mn, mm, true);
-		arma::cube S(m, m*m*m, n);
-		int m2 = m*m;
-		int m3 = m*m*m;
-		arma::vec cc1(m3);
-		arma::vec cc2(m2);
-		arma::vec cc3(m3);
-		arma::vec cc4(m);
-		arma::vec N(m3);
-		arma::uvec idx(m);
-		for(i=0;i<m;i++){
-			cc1.rows((i*m2), (i+1)*m2-1) = arma::ones<arma::vec>(m2)*i;
-			cc2.rows((i*m), (i+1)*m-1) = arma::ones<arma::vec>(m)*i;
-			cc4(i) = i;
-			idx(i) = (i)*m3 + (i)*m2 + (i)*m + i;
-		}
-		for(i=0;i<m3;i++){
-			N(i)=i;
-		}
-		cc2 = arma::repmat(cc2,  m, 1);
-		cc3 = arma::repmat(cc4, m2, 1);
-		arma::mat Y = arma::join_rows(cc1,cc2);
-		Y = arma::join_rows(Y,cc3);
-		int my = Y.n_cols;
-		arma::mat X(m3, my);
-		for(i=0;i<m3;i++){
-			X.row(i) = sort(Y.row(i));
-		}
-		arma::uvec X1 = (X.col(0)==X.col(1))%(X.col(1)==X.col(2));
-		arma::uvec X2 = (X.col(0)<X.col(1))%(X.col(1)<X.col(2));
-		arma::uvec excl1 = arma::find(X1==1);
-		arma::uvec excl2 = arma::find(X2==1);
-		arma::uvec excl = arma::unique(arma::join_cols(excl1, excl2));
-		int nb = excl.n_rows;
-		arma::uvec C(m3);
-		C.ones();
-		for(i=0;i<nb;i++){
-			C(excl(i))=0;
-		}
-		arma::uvec incl = arma::find(C==1);
-		N = N.elem(incl);
-		arma::mat Z = X.rows(incl);
-		int nx = Z.n_rows;
-		arma::uvec rw(nx);
-		arma::mat AAA = kron(AA.t(), kron(AA.t(), AA.t()));
-		arma::mat ck(m, m3);
-		for(j=0;j<n;j++){
-			ck.zeros();
-			arma::rowvec sx = AS.row(j);
-			arma::rowvec kx = AK.row(j);
-			for(i=0;i<nx;i++){
-				if(Z(i,0)==Z(i,1)){
-					rw(i) = Z(i,2);
-				} else{
-					rw(i) = Z(i,0);
-				}
-				arma::rowvec uq = unique(Z.row(i));
-				ck(rw(i), N(i)) = sx(uq(0))*sx(uq(1));
-			}
-			for(i=0;i<m;i++){
-				ck(idx(i)) = kx(i);
-			}
-			S.slice(j) = AA * ck * AAA;
-		}
-		return wrap( S );
-		} catch( std::exception &ex ) {
-			forward_exception_to_r( ex );
-		} catch(...) {
-			::Rf_error( "rmgarch-->gogarch cokurt c++ exception (unknown reason)" );
-		}
-		return R_NilValue;
-}
 
 SEXP Cov2Cor(SEXP YY, SEXP dimm){
 	try{
@@ -284,6 +249,56 @@ SEXP RowUnique(SEXP YY){
 	}
 	return R_NilValue;
 }
+
+SEXP gogarchcssigma(SEXP idx, SEXP SS)
+{
+	try{
+		Rcpp::NumericMatrix ix(idx);
+		int m = ix.nrow(), i;
+		arma::mat yix(ix.begin(), m, 3, false);
+		arma::vec S = Rcpp::as<arma::vec>(SS);
+		arma::vec R(m);
+		arma::uvec dx(3);
+		for(i=0;i<m;i++){
+			dx(0) = (int) yix(i,0);
+			dx(1) = (int) yix(i,1);
+			dx(2) = (int) yix(i,2);
+			R(i) = arma::prod(S.elem(dx));
+		}
+		return wrap( R );
+	} catch( std::exception &ex ) {
+		forward_exception_to_r( ex );
+	} catch(...) {
+		::Rf_error( "rmgarch-->gogarchcssigma c++ exception (unknown reason)" );
+	}
+	return R_NilValue;
+}
+
+SEXP gogarchcksigma(SEXP idx, SEXP SS)
+{
+	try{
+		Rcpp::NumericMatrix ix(idx);
+		int m = ix.nrow(), i;
+		arma::mat yix(ix.begin(), m, 4, false);
+		arma::vec S = Rcpp::as<arma::vec>(SS);
+		arma::vec R(m);
+		arma::uvec dx(4);
+		for(i=0;i<m;i++){
+			dx(0) = (int) yix(i,0);
+			dx(1) = (int) yix(i,1);
+			dx(2) = (int) yix(i,2);
+			dx(3) = (int) yix(i,3);
+			R(i) = arma::prod(S.elem(dx));
+		}
+		return wrap( R );
+	} catch( std::exception &ex ) {
+		forward_exception_to_r( ex );
+	} catch(...) {
+		::Rf_error( "rmgarch-->gogarchcksigma c++ exception (unknown reason)" );
+	}
+	return R_NilValue;
+}
+
 
 arma::mat coskewind(arma::rowvec skew){
 	int n = skew.n_cols, i;

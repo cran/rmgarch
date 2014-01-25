@@ -170,3 +170,135 @@ newlagmatrix = function(x, nlags, xc)
 	ans[z] = c("***")
 	ans
 }
+###############################################################################
+cordist = function(R, distance = c("ma","ms","meda","meds","eigen", "cmd"), n = 25, 
+		plot = TRUE, dates = NULL, title = NULL)
+{
+	T = dim(R)[3]
+	s = seq(1, T, by = n)
+	if(s[length(s)]!=T) s = c(s, T)
+	m = length(s)
+	Z = matrix(0, ncol = m, nrow = m)
+	for(i in 1:(m-1)){
+		for(j in (i+1):m){
+			Z[i,j] = xfun(R[,,s[j]], R[,,s[i]], type=distance[1])
+		}
+	}
+	Z = (Z + t(Z))
+	
+	if(!is.null(dates)){
+		if(!is(dates, "POSIXct")) stop("\ndates must be a POSIXct vector")
+		if(length(dates)!=T) stop("\ndates length not equal to correlation array extent.")
+		D = format(dates[s], "%Y")
+	} else{
+		D = as.character(s)
+	}
+	rownames(Z)=colnames(Z) = D
+	idx = sapply(unique(D), FUN = function(x) min(which(D==x)))
+	labCol = labRow = rep(NA, length(D))
+	labCol[idx] = D[idx]
+	labRow[idx] = D[idx]
+	labRow = labRow[idx]
+	labCol = labCol[idx]
+	if(plot){
+		par(bg="WhiteSmoke", col.main="black", col.lab="black", col.axis="black", cex.main=0.8, font=2)
+		heatmap3(Z, labRow = labRow, labCol = labCol, at = idx/length(D), 
+				col = rev(colorRampPalette(c("red", "orange","yellow"))( 15 )), 
+				main = title)
+	}
+	return(invisible(Z))
+}
+
+
+upper.tri_na = function(x){
+	z = upper.tri(x)
+	z[z==FALSE] = NA
+	z[z==TRUE] = 1
+	return(z)
+}
+
+lower.tri_na = function(x){
+	z = lower.tri(x)
+	z[z==FALSE] = NA
+	z[z==TRUE] = 1
+	return(z)
+}
+
+xfun = function(C1, C2, type)
+{
+	ans = switch(tolower(type),
+			ma = xfun1(C1, C2),
+			ms = xfun2(C1, C2),
+			meda = xfun3(C1, C2),
+			meds = xfun4(C1, C2),
+			eigen = eigfun(C1,C2),
+			cmd = CMD(C1, C2))
+	return( ans )
+}
+
+xfun1 = function(C1, C2){
+	mean(abs((C1 - C2) * upper.tri_na(C1)), na.rm = TRUE)
+}
+
+xfun2 = function(C1, C2){
+	mean(((C1 - C2) * upper.tri_na(C1))^2, na.rm = TRUE)
+}
+
+xfun3 = function(C1, C2){
+	median(abs((C1 - C2) * upper.tri_na(C1)), na.rm = TRUE)
+}
+
+xfun4 = function(C1, C2){
+	median(((C1 - C2) * upper.tri_na(C1))^2, na.rm = TRUE)
+}
+
+eigfun = function(C1, C2){
+	e1 = eigen(C1, only.values = TRUE)$values[1]
+	e2 = eigen(C2, only.values = TRUE)$values[1]
+	return(e1 - e2)
+}
+
+heatmap3 = function (x,  revC = TRUE, labRow = NULL, labCol = NULL, at = 1:NROW(x)/NROW(x),
+		main = NULL, col = rev(heat.colors(12, alpha = 0.9)), ...) 
+{
+	dev.hold()
+	on.exit(dev.flush())
+	op <- par(no.readonly = TRUE)
+	on.exit(par(op), add = TRUE)
+	colx = col
+	if (length(di <- dim(x)) != 2 || !is.numeric(x)) stop("'x' must be a numeric matrix")
+	nr <- di[1L]
+	nc <- di[2L]
+	if (nr <= 1 || nc <= 1) stop("'x' must have at least 2 rows and 2 columns")
+	Rowv = NA
+	Colv   = NA
+	if (is.null(Rowv)) Rowv <- rowMeans(x, na.rm = TRUE)
+	if (is.null(Colv)) Colv <- colMeans(x, na.rm = TRUE)
+	rowInd <- 1L:nr
+	colInd <- 1L:nc
+	x <- x[rowInd, colInd]
+	if (revC) {
+		iy <- nr:1
+		x <- x[, iy]
+	}
+	par(mar=c(3.1,4.1,4.1,2.1))
+	image(x, axes = FALSE, xlab = "", ylab = "", col = colx, ...)	
+	axis(2, at = 1-rev(at), labels = rev(labRow))
+	axis(3, at = at, labels = labCol)
+	if (!is.null(main)) {
+		par(xpd = NA)
+		mtext(main, side = 1, 
+				adj = NA, padj = 1, cex = op[["cex.main"]], col = op[["col.main"]])		
+	}
+	return(invisible(1))
+}
+
+CMD = function(C1, C2)
+{
+	Cv1 = as.vector(C1)
+	Cv2 = as.vector(C2)
+	v = Cv1 %*% Cv2
+	v1 = sqrt(sum(Cv1^2))
+	v2 = sqrt(sum(Cv2^2))
+	return( as.numeric( 1 - (v/(v1*v2)) ) )	
+}

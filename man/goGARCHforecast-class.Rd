@@ -11,6 +11,9 @@
 \alias{rcor,goGARCHforecast-method}
 \alias{rcoskew,goGARCHforecast-method}
 \alias{rcov,goGARCHforecast-method}
+\alias{betacovar,goGARCHforecast-method}
+\alias{betacoskew,goGARCHforecast-method}
+\alias{betacokurt,goGARCHforecast-method}
 \alias{show,goGARCHforecast-method}
 \title{class: GO-GARCH Forecast Class}
 \description{Class for the GO-GARCH forecast.}
@@ -131,6 +134,24 @@ Class \code{"\linkS4class{rGARCH}"}, by class "mGARCHforecast", distance 3.
 	for the mixing matrix, \dQuote{W} for the unmixing matrix, \dQuote{U} for the 
 	rotational matrix and \dQuote{K} for the whitening matrix, \dQuote{Kinv} for
 	the de-whitening matrix.}
+	\item{betacovar}{\code{signature(object = "goGARCHforecast")}:
+	function:\cr
+	\bold{betacovar(object, weights, asset = 1)}\cr
+	Returns the covariance beta given a matrix (of length equal to the number of 
+	rows of the forecast horizon, or vector which is then recycled to the number 
+	of rows of the forecast horizon) of benchmark weights and the asset number.}
+	\item{betacoskew}{\code{signature(object = "goGARCHforecast")}:
+	function:\cr
+	\bold{betacoskew(object, weights, asset = 1)}\cr
+	Returns the coskewness beta given a matrix (of length equal to the number of 
+	rows of the forecast horizon, or vector which is then recycled to the number 
+	of rows of the forecast horizon) of benchmark weights and the asset number.}
+	\item{betacokurt}{\code{signature(object = "goGARCHforecast")}:
+	function:\cr
+	\bold{betacokurt(object, weights, asset = 1)}\cr
+	Returns the cokurtosis beta given a matrix (of length equal to the number of 
+	rows of the forecast horizon, or vector which is then recycled to the number 
+	of rows of the forecast horizon) of benchmark weights and the asset number.}
     \item{show}{\code{signature(object = "goGARCHforecast")}: Summary method. }
 	}
 }

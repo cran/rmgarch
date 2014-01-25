@@ -43,7 +43,7 @@
 				stop("\nK (whiteningMatrix) matrix must be provided in reduced dimension system.")
 			}
 			if(!is.null(ica.fix$Kinv)){
-				invK = as.matrix(ica.fix$Kinv)
+				Kinv = as.matrix(ica.fix$Kinv)
 				if(NROW(Kinv) != m | NCOL(Kinv) != fc) stop("\nwrong dimension for Kinv matrix provided in ica.fix\n", call.  = FALSE)
 			} else{
 				stop("\nKinv (dewhiteningMatrix) matrix must be provided in reduced dimension system.")

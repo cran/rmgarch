@@ -13,6 +13,9 @@
 \alias{rcoskew,goGARCHfilter-method}
 \alias{rcokurt,goGARCHfilter-method}
 \alias{rcov,goGARCHfilter-method}
+\alias{betacovar,goGARCHfilter-method}
+\alias{betacoskew,goGARCHfilter-method}
+\alias{betacokurt,goGARCHfilter-method}
 \alias{show,goGARCHfilter-method}
 \title{class: GO-GARCH Filter Class}
 \description{Class for the GO-GARCH filtered object.}
@@ -115,6 +118,24 @@ with less than 100 assets.}
 Returns the time-varying NxN covariance matrix in array format.}
 \item{rcor}{\code{signature(object = "goGARCHfilter")}: 
 Returns the time-varying NxN correlation matrix in array format. }
+\item{betacovar}{\code{signature(object = "goGARCHfilter")}:
+function:\cr
+\bold{betacovar(object, weights, asset = 1, cluster = NULL)}\cr
+Returns the covariance beta given a matrix (of length equal to the number of 
+rows of the original data, or vector which is then recycled to the number 
+of rows of the original data) of benchmark weights and the asset number.}
+\item{betacoskew}{\code{signature(object = "goGARCHfilter")}:
+function:\cr
+\bold{betacoskew(object, weights, asset = 1, cluster = NULL)}\cr
+Returns the coskewness beta given a matrix (of length equal to the number of 
+rows of the original data, or vector which is then recycled to the number 
+of rows of the original data) of benchmark weights and the asset number.}
+\item{betacokurt}{\code{signature(object = "goGARCHfilter")}:
+function:\cr
+\bold{betacokurt(object, weights, asset = 1, cluster = NULL)}\cr
+Returns the cokurtosis beta given a matrix (of length equal to the number of 
+rows of the original data, or vector which is then recycled to the number 
+of rows of the original data) of benchmark weights and the asset number.}
 \item{show}{\code{signature(object = "goGARCHfilter")}: Summary method. }
 }
 }

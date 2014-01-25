@@ -80,19 +80,19 @@ rmgarch.test5a = function(cluster = NULL)
 			length(ffit4@mfit$matcoef[,1])) +  (3^2 - 3)/2
 	# (3^2-2)/2 is the calculated unconditional matrix
 	aicmod = c(
-			rugarch:::.information.test(fit1@mfit$llh, nObs = fit1@model$modeldata$T, 
+			rugarch:::.information.test(fit1@mfit$llh,  nObs = fit1@model$modeldata$T, 
 					nPars = np[1])[[1]],
 			rugarch:::.information.test(ffit1@mfit$llh, nObs = ffit1@model$modeldata$T, 
 					nPars = np[2])[[1]],
-			rugarch:::.information.test(fit2@mfit$llh, nObs = fit2@model$modeldata$T, 
+			rugarch:::.information.test(fit2@mfit$llh,  nObs = fit2@model$modeldata$T, 
 					nPars = np[3])[[1]],
 			rugarch:::.information.test(ffit2@mfit$llh, nObs = ffit2@model$modeldata$T, 
 					nPars = np[4])[[1]],
-			rugarch:::.information.test(fit3@mfit$llh, nObs = fit3@model$modeldata$T, 
+			rugarch:::.information.test(fit3@mfit$llh,  nObs = fit3@model$modeldata$T, 
 					nPars = np[5])[[1]],
 			rugarch:::.information.test(ffit3@mfit$llh, nObs = ffit3@model$modeldata$T, 
 					nPars = np[6])[[1]],
-			rugarch:::.information.test(fit4@mfit$llh, nObs = fit4@model$modeldata$T, 
+			rugarch:::.information.test(fit4@mfit$llh,  nObs = fit4@model$modeldata$T, 
 					nPars = np[7])[[1]],
 			rugarch:::.information.test(ffit4@mfit$llh, nObs = ffit4@model$modeldata$T, 
 					nPars = np[8])[[1]])

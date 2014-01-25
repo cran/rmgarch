@@ -19,17 +19,13 @@ the correlation.\cr
 \tabular{ll}{
 Package: \tab rmgarch\cr
 Type: \tab Package\cr
-Version: \tab 1.00-4\cr
-Date: \tab 2013-02-20\cr
+Version: \tab 1.2-5\cr
+Date: \tab 2014-01-25\cr
 License: \tab GPL\cr
 LazyLoad: \tab yes\cr
-Depends:\tab R (>= 2.15.0), Rcpp, RcppArmadillo, rugarch (>= 1.0-16), methods, MASS, parallel, Matrix\cr
+Depends: R (>= 3.0.2), methods, rugarch\cr
 LinkingTo:\tab Rcpp, RcppArmadillo\cr
-SystemRequirements: \tab GNU make\cr
-Imports: \tab rugarch}
-The package belongs to the rgarch project currently hosted on r-forge, which
-also includes the univariate GARCH models package rugarch (which is also a 
-required to run this  package).\cr
+Imports: Rsolnp, MASS, parallel, Matrix, zoo, xts, Bessel, ff, fftw, shape, Kendall, spd, Rcpp\cr}
 The main package functionality, currently supports the \emph{GO-GARCH} with ICA 
 method, and is available through the \code{\link{gogarchspec}}, 
 \code{\link{gogarchfit}}, \code{\link{gogarchfilter}}, \code{\link{gogarchforecast}}, 
@@ -49,7 +45,7 @@ multivariate GARCH models are documented in the class of the returned objects.\c
  author       = {Alexios Ghalanos},
  title        = {{rmgarch}: Multivariate GARCH models.},
  year         = {2013},
- note 	      = {R package version 1.00-4.}}}
+ note 	      = {R package version 1.2-4.}}}
 }
 \section{License}{
   The releases of this package is licensed under GPL version 3.

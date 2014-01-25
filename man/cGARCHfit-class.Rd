@@ -48,7 +48,7 @@ Class \code{"\linkS4class{rGARCH}"}, by class "mGARCHfit", distance 3.
     Summary.}
     \item{sigma}{\code{signature(object = "cGARCHfit")}: 
     The model conditional sigma (xts object). }
-	 }
+    }
 }
 \references{
 Joe, H. \emph{Multivariate Models and Dependence Concepts}, 1997, 

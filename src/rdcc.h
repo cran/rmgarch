@@ -16,9 +16,6 @@
 #################################################################################*/
 #ifndef _rdcc_H
 #define _rdcc_H
-#include <R.h>
-#include <Rmath.h>
-#include <math.h>
 #include <RcppArmadillo.h>
 #include "rmdist.h"
 RcppExport SEXP dccnormC1(SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP , SEXP );

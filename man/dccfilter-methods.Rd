@@ -9,7 +9,7 @@ Method for creating a DCC-GARCH filter object.
 }
 \usage{
 dccfilter(spec, data, out.sample = 0, filter.control = list(n.old = NULL), 
-cluster = NULL, varcoef = NULL, ...) 
+cluster = NULL, varcoef = NULL, realizedVol = NULL, ...) 
 }
 \arguments{
   	\item{spec}{ A \code{\linkS4class{DCCspec}} object created by calling 
@@ -26,6 +26,7 @@ cluster = NULL, varcoef = NULL, ...)
 	\item{varcoef}{ If a VAR model was chosen, then this is the VAR coefficient 
 	matrix which must be supplied. No checks are done on its dimension or 
 	correctness so it is up to the user to perform the appropriate checks.}
+	\item{realizedVol}{ Required xts matrix for the realGARCH model.}
 	\item{...}{ . }
 }
 \value{

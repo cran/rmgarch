@@ -3,9 +3,9 @@
 \alias{gogarchfilter}
 \alias{gogarchfilter,ANY-method}
 \alias{gogarchfilter,goGARCHfit-method}
-\title{function: GO-GARCH Fitting}
+\title{function: GO-GARCH Filter}
 \description{
-Method for fitting the GO-GARCH model.
+Method for filtering the GO-GARCH model.
 }
 \usage{
 gogarchfilter(fit, data, out.sample = 0, n.old = NULL, cluster = NULL, ...) 

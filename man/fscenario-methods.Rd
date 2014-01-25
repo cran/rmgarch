@@ -13,9 +13,9 @@ fscenario(Data, sim = 1000, roll = 0,
 	model = c("gogarch", "dcc", "cgarch", "var", "mdist"), 
 	spec = NULL, 
 	var.model = list(lag = 1, lag.max = NULL, 
-				lag.criterion = c("AIC", "HQ", "SC", "FPE"), robust = FALSE, 
-				robust.control = list("gamma" = 0.25, "delta" = 0.01, "nc" = 10, 
-				"ns" = 500)),
+				lag.criterion = c("AIC", "HQ", "SC", "FPE"), 
+				robust = FALSE, robust.control = list("gamma" = 0.25, 
+				"delta" = 0.01, "nc" = 10, "ns" = 500)),
 	mdist.model = list(distribution = c("mvn", "mvt", "manig"), 
 				AR = TRUE, lag = 1),
 	spd.control = list(lower = 0.1, upper = 0.9, type = "pwm", 
@@ -58,7 +58,8 @@ returned to the workspace.}
 \item{rseed}{ A vector of length sim to initiate the random number generator.}
 \item{...}{ Additional parameters passed to the model fitting routines. In 
 particular, for the \sQuote{gogarch} model additional parameters are passed to
-the ICA routines.}
+the ICA routines, whereas for the \sQuote{dcc} and \sQuote{cgarch} models 
+this would include the \sQuote{realizedVol} xts matrix for the realGARCH model.}
 }
 \value{
 A \code{\linkS4class{fScenario}} object containing the scenario and the model 

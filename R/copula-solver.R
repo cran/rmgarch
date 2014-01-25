@@ -194,7 +194,7 @@ copula.adcccon = function(pars, arglist){
 	udata = arglist$ures
 	m = arglist$m
 	Z = switch(arglist$model$modeldesc$distribution,
-			"mvt" = matrix(rugarch:::qstd(udata, nu = ipars[idx["mshape",1], 1]), ncol=m),
+			"mvt" = matrix(rugarch:::qstd(udata, shape = ipars[idx["mshape",1], 1]), ncol=m),
 			"mvnorm" = qnorm(udata))
 	Qbar = cov(Z)
 	# Take care of the Asymmetry Matrices

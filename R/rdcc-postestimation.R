@@ -33,7 +33,7 @@
 		clusterEvalQ(cluster, require(rmgarch))
 		clusterExport(cluster, c("pars", "ee", "arglist", "n", "fname"), envir = environment())
 		tmp = parLapply(cluster, as.list(1:n), fun = function(i){
-					tmpg =  eval(parse(text = paste("rmgarch:::", fname, "( pars = pars + ee[, i], arglist)", sep = "")))
+					tmpg =  eval(parse(text = paste(fname, "( pars = pars + ee[, i], arglist)", sep = "")))
 					return( tmpg )
 				})
 		g = as.numeric( unlist(tmp) )
@@ -43,7 +43,7 @@
 					Htmp = H
 					for(j in  (n - dccN + 1):n){
 						if(i <= j){
-							Htmp[i, j] = eval(parse(text = paste("(rmgarch:::", fname, "( pars = pars + ee[, i] + ee[, j], arglist) - g[i] - g[j] + fx) / Htmp[i, j]", sep = "")))
+							Htmp[i, j] = eval(parse(text = paste("(",fname, "( pars = pars + ee[, i] + ee[, j], arglist) - g[i] - g[j] + fx) / Htmp[i, j]", sep = "")))
 							Htmp[j, i] = Htmp[i, j]
 						}
 					}

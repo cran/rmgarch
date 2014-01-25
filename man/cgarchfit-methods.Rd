@@ -11,7 +11,7 @@ Method for creating a Copula-GARCH fit object.
 cgarchfit(spec, data, spd.control = list(lower = 0.1, upper = 0.9, type = "pwm", 
 kernel = "epanech"), fit.control = list(eval.se = TRUE, stationarity = TRUE, 
 scale = FALSE), solver = "solnp", solver.control = list(), out.sample = 0, 
-cluster = NULL, fit = NULL, VAR.fit = NULL, ...) 
+cluster = NULL, fit = NULL, VAR.fit = NULL, realizedVol = NULL,...) 
 }
 \arguments{
   	\item{spec}{ A \code{\linkS4class{cGARCHspec}} A \code{\linkS4class{cGARCHspec}} 
@@ -39,6 +39,7 @@ cluster = NULL, fit = NULL, VAR.fit = NULL, ...)
 	\item{spd.control}{ If the spd transformation was chosen in the 
 	specification, the spd.control passes its arguments to the 
 	\code{spdfit} routine of the \code{spd} package.}
+	\item{realizedVol}{ Required xts matrix for the realGARCH model.}
 	\item{...}{ . }
 }
 \value{
@@ -64,7 +65,7 @@ the routine to be restarted should something go wrong (it should show up as
 \note{
 There is no check on the VAR.fit list passed to the method so particular care 
 should be exercised so that the same data used in the fitting routine is also 
-used in the VAR fit routine. This this must have been called with the option 
+used in the VAR fit routine. This must have been called with the option 
 \code{postpad} \sQuote{constant}. The ability to pass this list of the 
 pre-calculated VAR model is particularly useful when comparing different models 
 (such as DCC GARCH, GO GARCH etc) using the same dataset and VAR method (i.e. 

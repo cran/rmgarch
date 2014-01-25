@@ -29,6 +29,9 @@
 			model = ifelse(class(spec)[1]=="goGARCHspec", "gogarch", "dcc"), 
 			n.ahead = n.ahead, roll = roll, save.output = save.output, save.dir = save.dir,
 			save.name = save.name)
+	# ... in mom.dcc are to pass the realizedVol matrix whereas in the GOGARCH model
+	# (which does not use realizedVol), they are related to extra arguments passed to
+	# the fastica routine
 	mom = switch(class(spec)[1],
 			goGARCHspec = mom.gogarch(Data = Data, spec = spec, n.ahead = n.ahead, 
 					roll  = roll, solver = solver, solver.control = solver.control, 
@@ -39,7 +42,7 @@
 					roll  = roll, solver = solver, solver.control = solver.control, 
 					fit.control = fit.control, cluster = cluster,
 					save.output = save.output, save.dir = save.dir, 
-					save.name = save.name))
+					save.name = save.name, ...))
 	
 	if(!save.output){
 		sol = new("fMoments",
@@ -331,18 +334,27 @@ scenario.gogarch = function(Data, spec, sim = 1000, roll = 0, solver = "solnp",
 	}
 }
 
-
 scenario.dcc = function(Data, spec, sim, roll, solver = "solnp", 
 		fit.control = list(eval.se = FALSE), solver.control = list(), 
 		cluster = NULL, rseed = NULL, save.output = FALSE, save.dir = getwd(), 
 		save.name = NULL, debug = FALSE, ...)
 {
 	pars = list(...)
+	modv = spec@spec[[1]]@model$modeldesc$vmodel
 	if(is.null(pars$fit)) xfit = NULL else xfit = pars$fit
 	if(is.null(pars$VAR.fit)) VAR.fit = NULL else VAR.fit = pars$VAR.fit
+	if(modv=="realGARCH"){
+		if(is.null(pars$realizedVol)){
+			stop("\nfscenario-->error: realizedVol required for realGARCH model.\n")
+		} else{
+			realizedVol = pars$realizedVol
+		}
+	} else{
+		realizedVol = NULL
+	}
 	fit = dccfit(spec, data =  Data, out.sample = roll, solver = solver, 
 			solver.control = list(), fit.control = fit.control, cluster = cluster,
-			fit = xfit, VAR.fit = VAR.fit)
+			fit = xfit, VAR.fit = VAR.fit, realizedVol = realizedVol)
 	
 	T = fit@model$modeldata$T
 	T0 = fit@model$modeldata$index[(T):(T+roll)]
@@ -379,7 +391,7 @@ scenario.dcc = function(Data, spec, sim, roll, solver = "solnp",
 			model = spec@model$DCC, groups = spec@model$fdccindex, 
 			distribution = model$modeldesc$distribution, fixed.pars = dccfix)
 	filt = dccfilter(specf, data = Data, out.sample = 0, filter.control = list(n.old = T),
-			cluster = cluster, varcoef = varcoef)
+			cluster = cluster, varcoef = varcoef, realizedVol = realizedVol)
 	sig = sigma(filt)
 	res = residuals(filt)
 	C = rcor(filt, type = "Q")
@@ -395,13 +407,14 @@ scenario.dcc = function(Data, spec, sim, roll, solver = "solnp",
 	for(i in 1:(roll+1)){
 		preQ = C[,,(T+i-1)]
 		presigma = sig[(T-p+i):(T-1+i), , drop=FALSE]
+		if(modv=="realGARCH") prerealized = coredata(realizedVol)[(T-p+i):(T-1+i), , drop=FALSE] else prerealized = NULL
 		preresiduals = res[(T-p+i):(T-1+i), , drop=FALSE]
 		prereturns = as.matrix(Data[(T+i-p):(T+i-1),], ncol = m)
 		preZ = matrix(Z[(T-p+i):(T-1+i),], ncol = m)
 		fsim = dccsim(fitORspec = fit, n.sim = 1, n.start = 0, m.sim = sim, startMethod="sample",
 				presigma = presigma, preresiduals = preresiduals, 
 				prereturns = prereturns, preQ = preQ, preZ = preZ, Qbar = fit@mfit$Qbar, 
-				rseed = zseed[i], cluster = cluster)
+				rseed = zseed[i], cluster = cluster, prerealized = prerealized)
 		simMu[[i]] = t(sapply(fsim@msim$simX, FUN = function(x) x))
 		simZ = sapply(fsim@msim$simZ, FUN = function(x) tail(x,1))		
 		HH = array(unlist(fsim@msim$simH), dim=c(m,m,sim))
@@ -430,12 +443,22 @@ scenario.cgarch = function(Data, spec, spd.control, sim, roll, solver = "solnp",
 		save.name = NULL, debug = FALSE, ...)
 {
 	pars = list(...)
+	modv = spec@spec[[1]]@model$modeldesc$vmodel
 	if(is.null(pars$fit)) xfit = NULL else xfit = pars$fit
 	if(is.null(pars$VAR.fit)) VAR.fit = NULL else VAR.fit = pars$VAR.fit
+	if(modv=="realGARCH"){
+		if(is.null(pars$realizedVol)){
+			stop("\nfscenario-->error: realizedVol required for realGARCH model.\n")
+		} else{
+			realizedVol = pars$realizedVol
+		}
+	} else{
+		realizedVol = NULL
+	}
 	fit = cgarchfit(spec, data = Data, spd.control = spd.control, 
 			out.sample = roll, solver = solver, 
 			solver.control = solver.control, fit.control = fit.control, 
-			cluster = cluster, fit = xfit, VAR.fit = VAR.fit)
+			cluster = cluster, fit = xfit, VAR.fit = VAR.fit, realizedVol = realizedVol, ...)
 	fsim = vector(mode="list", length = roll)
 	p = spec@model$maxgarchOrder
 	T = fit@model$modeldata$T
@@ -468,7 +491,8 @@ scenario.cgarch = function(Data, spec, spd.control, sim, roll, solver = "solnp",
 			fixed.pars = dccfix)
 	# we really only need to use this if roll>0
 	filt = cgarchfilter(specf, data = Data, out.sample = 0, filter.control = list(n.old = T),
-			spd.control = spd.control, cluster = cluster, varcoef = varcoef)
+			spd.control = spd.control, cluster = cluster, varcoef = varcoef,
+			realizedVol = realizedVol)
 	if(roll>0){
 		forecastMu = rbind(tail(filt@model$mu, roll), matrix(NA, ncol = m))
 	} else{
@@ -487,25 +511,53 @@ scenario.cgarch = function(Data, spec, spd.control, sim, roll, solver = "solnp",
 	} else{
 		zseed = as.integer( runif( roll+1, 0, as.integer(Sys.time()) ) )
 	}
-	for(i in 1:(roll+1)){
-		preR = R[,,(T+i-1)]
-		# extra check
-		diag(preR) = 1
-		preQ = Q[[(T+i-1)]]
-		presigma = sig[(T-p+i):(T-1+i),, drop=FALSE]
-		preresiduals = res[(T-p+i):(T-1+i),, drop=FALSE]
-		prereturns = as.matrix(Data[(T-p+i):(T-1+i),], ncol = m)
-		preZ = matrix(Z[(T-p+i):(T-1+i),], ncol = m)
-		fsim = cgarchsim(fit, n.sim = 1, n.start = 0, m.sim = sim, 
-				startMethod = "sample", presigma = presigma, 
-				preresiduals = preresiduals, prereturns = prereturns, 
-				preR = preR, preQ = preQ, preZ = preZ, mexsimdata = NULL, 
-				vexsimdata = NULL, cluster = cluster, rseed = zseed[i])
-		simMu[[i]] = t(sapply(fsim@msim$simX, FUN = function(x) x))
-		simZ = t(apply(fsim@msim$simZ, 3, FUN = function(x) tail(x, 1)))
-		HH = array(unlist(fsim@msim$simH), dim=c(m,m,sim))
-		simRes[[i]] = .Call("Cov2Res", HH, simZ, as.integer(c(sim, m)), PACKAGE="rmgarch")
-		xseed[[i]] = fsim@msim$rseed
+	# distinguish between static and time varying copula
+	if(spec@model$modeldesc$timecopula){
+		for(i in 1:(roll+1)){
+			preR = R[,,(T+i-1)]
+			# extra check
+			diag(preR) = 1
+			preQ = Q[[(T+i-1)]]
+			presigma = sig[(T-p+i):(T-1+i),, drop=FALSE]
+			if(modv=="realGARCH") prerealized = coredata(realizedVol)[(T-p+i):(T-1+i), , drop=FALSE] else prerealized = NULL
+			preresiduals = res[(T-p+i):(T-1+i),, drop=FALSE]
+			prereturns = as.matrix(Data[(T-p+i):(T-1+i),], ncol = m)
+			preZ = matrix(Z[(T-p+i):(T-1+i),], ncol = m)
+			fsim = cgarchsim(fit, n.sim = 1, n.start = 0, m.sim = sim, 
+					startMethod = "sample", presigma = presigma, 
+					preresiduals = preresiduals, prereturns = prereturns, 
+					preR = preR, preQ = preQ, preZ = preZ, mexsimdata = NULL, 
+					vexsimdata = NULL, cluster = cluster, rseed = zseed[i],
+					prerealized = prerealized)
+			simMu[[i]] = t(sapply(fsim@msim$simX, FUN = function(x) x))
+			simZ = t(apply(fsim@msim$simZ, 3, FUN = function(x) tail(x, 1)))
+			HH = array(unlist(fsim@msim$simH), dim=c(m,m,sim))
+			simRes[[i]] = .Call("Cov2Res", HH, simZ, as.integer(c(sim, m)), PACKAGE="rmgarch")
+			xseed[[i]] = fsim@msim$rseed
+		}
+	} else{
+		for(i in 1:(roll+1)){
+			preR = R
+			# extra check
+			diag(preR) = 1
+			presigma = sig[(T-p+i):(T-1+i),, drop=FALSE]
+			if(modv=="realGARCH") prerealized = coredata(realizedVol)[(T-p+i):(T-1+i), , drop=FALSE] else prerealized = NULL
+			
+			preresiduals = res[(T-p+i):(T-1+i),, drop=FALSE]
+			prereturns = as.matrix(Data[(T-p+i):(T-1+i),], ncol = m)
+			preZ = matrix(Z[(T-p+i):(T-1+i),], ncol = m)
+			fsim = cgarchsim(fit, n.sim = 1, n.start = 0, m.sim = sim, 
+					startMethod = "sample", presigma = presigma, 
+					preresiduals = preresiduals, prereturns = prereturns, 
+					preR = preR, preQ = preQ, preZ = preZ, mexsimdata = NULL, 
+					vexsimdata = NULL, cluster = cluster, rseed = zseed[i],
+					prerealized = prerealized)
+			simMu[[i]] = t(sapply(fsim@msim$simX, FUN = function(x) x))
+			simZ = t(apply(fsim@msim$simZ, 3, FUN = function(x) tail(x, 1)))
+			HH = array(unlist(fsim@msim$simH), dim=c(m,m,sim))
+			simRes[[i]] = .Call("Cov2Res", HH, simZ, as.integer(c(sim, m)), PACKAGE="rmgarch")
+			xseed[[i]] = fsim@msim$rseed
+		}
 	}
 	if(save.output){
 		olddir = getwd()
