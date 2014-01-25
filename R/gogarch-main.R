@@ -398,7 +398,7 @@
 					variance.model = list(model = model$umodel$vmodel, garchOrder = model$umodel$garchOrder, 
 							submodel = model$umodel$vsubmodel, variance.targeting = FALSE), 
 					distribution.model = model$umodel$distribution, fixed.pars = as.list(fit@mfit$garchcoef[,i]))
-		clusterEvalQ(cluster, require("rugarch"))
+		clusterEvalQ(cluster, library("rugarch"))
 		clusterExport(cluster, c("presig", "factor.preres", "sm", "specx", 
 						"n.sim", "n.start", "m.sim", "startMethod", "xseed"), 
 				envir = environment())

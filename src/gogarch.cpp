@@ -16,6 +16,7 @@
 #################################################################################*/
 // Extra method for speedup
 #include "gogarch.h"
+#undef CS
 using namespace Rcpp;
 
 SEXP tvbetacovar(SEXP wi, SEXP Vi, SEXP di)

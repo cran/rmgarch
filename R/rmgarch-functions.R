@@ -14,8 +14,6 @@
 ##   GNU General Public License for more details.
 ##
 #################################################################################
-
-
 #---------------------------------------------------------------------------------
 # Locally imported copy of "klin.eval" from the klin package
 incseq = function (a, b) 
