@@ -86,7 +86,7 @@ mvmean.arfit = function(model, data, ARcoef = NULL, T, out.sample = 0, solver,
 						arfima = FALSE, external.regressors = ex[1:T, , drop = FALSE]), 
 				distribution.model = "norm")
 		if( !is.null(cluster) ){
-			clusterEvalQ(cluster, require("rugarch"))
+			clusterEvalQ(cluster, library("rugarch"))
 			clusterExport(cluster, c("T", "arspec", "data", "solver", 
 							"solver.control", "fit.control"), envir = environment())
 			arfit = parLapply(cluster, as.list(1:m), fun = function(i){
@@ -124,7 +124,7 @@ mvmean.arfit = function(model, data, ARcoef = NULL, T, out.sample = 0, solver,
 		p = model$modelinc[2]
 		# Irrespsective of the Distribution, the mean filtration is always Normal.
 		if( !is.null(cluster) ){
-			clusterEvalQ(cluster, require("rugarch"))
+			clusterEvalQ(cluster, library("rugarch"))
 			clusterExport(cluster, c("T", "ARcoef", "data", "solver", 
 							"solver.control", "fit.control"), envir = environment())
 			arfit = parLapply(cluster, as.list(1:m), fun = function(i){
@@ -234,7 +234,7 @@ mvmean.arfilter = function(model, data, arcoef, T, out.sample = 0, cluster = NUL
 	m = NCOL(data)
 	p = model$modelinc[2]
 	if( !is.null(cluster) ){
-			clusterEvalQ(cluster, require("rugarch"))
+			clusterEvalQ(cluster, library("rugarch"))
 			clusterExport(cluster, c("T", "data", "p", "ex", "arcoef"), 
 					envir = environment())
 			armodel = parLapply(cluster, as.list(1:m), fun = function(i) {
@@ -327,7 +327,7 @@ mvmean.arforecast = function(model, mregfor, arcoef, n.ahead, n.roll, ns, cluste
 	m = NCOL(model$modeldata$data)
 	tf = n.ahead + n.roll
 	if( !is.null(cluster) ){
-		clusterEvalQ(cluster, require("rugarch"))
+		clusterEvalQ(cluster, library("rugarch"))
 		clusterExport(cluster, c("model", "arcoef", "mregfor", "ns", 
 						"n.ahead", "n.roll"), envir = environment())
 		arfx = parLapply(cluster, as.list(1:m), fun = function(i){
@@ -487,7 +487,7 @@ mvmean.arsim = function(model, Data, res, arcoef, mxn, mexdata, mexsimdata,
 	}
 	if( !is.null(cluster) ){
 			tres = matrix(tail(preresiduals, p), ncol = m)
-			clusterEvalQ(cluster, require("rugarch"))
+			clusterEvalQ(cluster, library("rugarch"))
 			clusterExport(cluster, c("p", "ex", "arcoef", "mexsimdata", 
 							"res", "n.start", "tres", "n.sim", "m.sim", 
 							"prereturns"), envir = environment())

@@ -1980,7 +1980,7 @@
 	
 	if( !is.null(cluster) ){
 			tailres = fit@mfit$tailuresids
-			clusterEvalQ(cluster, require('rugarch'))
+			clusterEvalQ(cluster, library('rugarch'))
 			clusterExport(cluster, c("mspec", "n.sim", "n.start", "m.sim", 
 							"startMethod", "zres", "presigma", "tailres",
 							"preresiduals", "prereturns", "model", "mexsimdata", 
