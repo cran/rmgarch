@@ -1067,8 +1067,8 @@ rmgarch.test3f = function(cluster = NULL)
 			fit.control = list(eval.se=FALSE))
 	
 	
-	sim1 = cgarchsim(fit1, n.sim = 1000, m.sim = 10, startMethod = "sample")
-	sim2 = cgarchsim(fit1, n.sim = 2, m.sim = 1000, startMethod = "sample")
+	sim1 = cgarchsim(fit1, n.sim = 1000, m.sim = 10, startMethod = "sample", cluster = cluster)
+	sim2 = cgarchsim(fit1, n.sim = 2, m.sim = 1000, startMethod = "sample", cluster = cluster)
 	# 2-ahead mean covariance (1-ahead has no uncertainty).
 	meanH = matrix(0,  3, 3)
 	for(i in 1:1000) meanH = meanH + sim2@msim$simH[[i]][,,2]

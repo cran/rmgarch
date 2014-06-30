@@ -1,3 +1,16 @@
+2014-06-11 Alexios Ghalanos <alexios@4dscape.com>
+	* DESCRIPTION (Version): New version is 1.2-8.
+	* Removed fftw dependency
+	* Fix to Copula-Student Simulation.
+	* Added logical argument for inclusion or not of 'constant' 
+	in varxfit function and updated related functions (filter,
+	forecast and sim) to take this into account [user request].
+
+2014-03-07 Alexios Ghalanos <alexios@4dscape.com>
+	* DESCRIPTION (Version): New version is 1.2-7.
+	* Fix to multivariate Student and Laplace random number generation for 
+	DCC simulation methods.
+	
 2014-01-26 Alexios Ghalanos <alexios@4dscape.com>
 	* DESCRIPTION (Version): New version is 1.2-6.
 	* Fix for solaris build [thanks to BDR].
@@ -6,7 +19,6 @@
 	* DESCRIPTION (Version): New version is 1.2-5.
 	* Patched to work with recent changes to Rcpp.
 
-	
 2014-01-05 Alexios Ghalanos <alexios@4dscape.com>
 	* DESCRIPTION (Version): New version is 1.2-4.
 	* Implemented very fast flattened tensor indexing for

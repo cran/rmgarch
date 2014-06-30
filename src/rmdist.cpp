@@ -17,6 +17,7 @@
 #include "rmdist.h"
 
 arma::rowvec rmvnormx(arma::mat R, arma::rowvec Z){
+	Rcpp::RNGScope scope;
 	int m = R.n_rows;
 	arma::vec eigval(m);
 	arma::mat eigvec(m, m);
@@ -29,31 +30,21 @@ arma::rowvec rmvnormx(arma::mat R, arma::rowvec Z){
 }
 
 arma::rowvec rmvtx(arma::mat R, const double nu, arma::rowvec Z){
-	Rcpp::RNGScope();
+	Rcpp::RNGScope scope;
 	int m = R.n_rows;
-	// use cholesky....it is simpler.
-	//arma::vec eigval(m);
-	//arma::mat eigvec(m, m);
-	//arma::mat temp(m, m);
-	//arma::eig_sym(eigval, eigvec, R);
-	//temp = ( eigvec * arma::diagmat( arma::sqrt( eigval ) ) * arma::inv( eigvec ) );
+	double rc = Rf_rchisq(nu);
+	arma::mat RR = ((nu-2.0)/nu)*R;
+	double v = sqrt(nu/rc);
 	arma::rowvec ans(m);
-	arma::mat temp = arma::chol(R);
-	double v = sqrt(Rf_rchisq(nu)/nu);
-	ans = (1.0/v) * (Z * temp);
+	ans = v*rmvnormx(RR, Z);
 	return ans;
 }
 
 arma::rowvec rmvlx(arma::mat R, arma::rowvec Z){
-	Rcpp::RNGScope();
-	double e  = Rf_rexp(1);
+	Rcpp::RNGScope scope;
 	int m = R.n_rows;
-	arma::vec eigval(m);
-	arma::mat eigvec(m, m);
-	arma::mat temp(m, m);
-	arma::eig_sym(eigval, eigvec, R);
+	double e  = Rf_rexp(1);
 	arma::rowvec ans(m);
-	temp = ( eigvec * arma::diagmat( arma::sqrt( eigval ) ) * arma::inv( eigvec ) );
-	ans = sqrt(e) * (Z * temp);
+	ans = sqrt(e) * rmvnormx(R, Z);
 	return ans;
 }

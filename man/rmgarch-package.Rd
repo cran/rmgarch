@@ -19,13 +19,15 @@ the correlation.\cr
 \tabular{ll}{
 Package: \tab rmgarch\cr
 Type: \tab Package\cr
-Version: \tab 1.2-6\cr
-Date: \tab 2014-01-26\cr
+Version: \tab 1.2-8\cr
+Date: \tab 2014-06-11\cr
 License: \tab GPL\cr
 LazyLoad: \tab yes\cr
-Depends: R (>= 3.0.2), methods, rugarch\cr
-LinkingTo:\tab Rcpp, RcppArmadillo\cr
-Imports: Rsolnp, MASS, parallel, Matrix, zoo, xts, Bessel, ff, fftw, shape, Kendall, spd, Rcpp\cr}
+Depends: \tab R (>= 3.0.2), methods, rugarch\cr
+LinkingTo: \tab Rcpp (>= 0.10.6), RcppArmadillo (>= 0.2.34)\cr
+Imports: \tab Rsolnp, MASS, parallel, Matrix, zoo, xts, Bessel, ff, shape, pcaPP, spd, Rcpp\cr
+Description: Feasible multivariate GARCH models including DCC, GO-GARCH and Copula-GARCH.\cr
+}
 The main package functionality, currently supports the \emph{GO-GARCH} with ICA 
 method, and is available through the \code{\link{gogarchspec}}, 
 \code{\link{gogarchfit}}, \code{\link{gogarchfilter}}, \code{\link{gogarchforecast}}, 
@@ -41,11 +43,11 @@ multivariate GARCH models are documented in the class of the returned objects.\c
 }
 \section{How to cite this package}{
   Whenever using this package, please cite as\cr
- \preformatted{@Manual{Ghalanos_2013,
+ \preformatted{@Manual{Ghalanos_2014,
  author       = {Alexios Ghalanos},
  title        = {{rmgarch}: Multivariate GARCH models.},
  year         = {2014},
- note 	      = {R package version 1.2-6.}}}
+ note 	      = {R package version 1.2-8.}}}
 }
 \section{License}{
   The releases of this package is licensed under GPL version 3.
@@ -75,8 +77,8 @@ dynamic conditional correlation multivariate GARCH, \emph{NBER Working Paper}.\c
 Genest, C., Ghoudi, K. and Rivest, L. 1995, A semiparametric estimation 
 procedure of dependence parameters in multivariate families of distributions, 
 \emph{Biometrika}, \bold{82}, 543--552.\cr
-Ghalanos, A., Rossi, E., and Urga, G. (2013). \emph{Independent Factor 
-Autoregressive Conditional Density Model}, \bold{forthcoming}.\cr
+Ghalanos, A., Rossi, E., and Urga, G. (2014). \emph{Independent Factor 
+Autoregressive Conditional Density Model}, \bold{Econometric Reviews}.\cr
 Paolella, M.S. 2007, Intermediate Probability - A Computational Approach, 
 \emph{Wiley-Interscience}.\cr
 Schmidt, R., Hrycej, T. and Stutzle 2006, Multivariate distribution models with 

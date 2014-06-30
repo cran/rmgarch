@@ -1625,20 +1625,21 @@
 	ures = .sample.copula(model, Qbar = NULL, preQ = NULL, Rbar = Rbar, 
 			Nbar = NULL, preZ = NULL, n.sim = n.sim, n.start = n.start, 
 			m.sim = m.sim, rseed = rseed, cluster = cluster)
+	
 	# ures = [0,1] copula random numbers
-	# now transform back into margins for use in garch	
+	# now transform back into margins for use in garch
 	transformation = model$modeldesc$transformation
 	distu = umodel$modeldesc$distribution
 	
 	zres = array(NA, dim = c(nsim, m, m.sim))
 	# parallel:
 	if( !is.null(cluster) ){
-		parallel::clusterEvalQ(cluster, library(rmgarch))
 		ssfit = model$sfit
 		minc = umodel$modelinc
 		mpars = model$mpars
 		sxres  = fit@mfit$stdresid
-		parallel::clusterEvalQ(cluster, require(rmgarch))
+		clusterEvalQ(cluster, loadNamespace('rmgarch'))
+		clusterEvalQ(cluster, loadNamespace('rugarch'))
 		if(transformation == "spd"){
 			clusterExport(cluster, c("ures", "mpars", "minc", "m", 
 							"sxres", "ssfit", "transformation"), envir = environment())
@@ -1647,7 +1648,6 @@
 							"transformation"), envir = environment())
 		}
 		clusterExport(cluster, c(".qparametric", ".qempirical",".qspd"), envir = environment())
-		
 		mtmp = parLapply(cluster, as.list(1:m.sim), fun = function(i){
 					switch(transformation,
 							parametric = .qparametric(matrix(ures[,,i], ncol = m), pars = mpars, modelinc = minc),
@@ -1671,14 +1671,14 @@
 	
 	if( !is.null(cluster) ){
 		tailres = fit@mfit$tailuresids
-		clusterEvalQ(cluster, library('rugarch'))
+		clusterEvalQ(cluster, loadNamespace('rugarch'))
 		clusterExport(cluster, c("mspec", "n.sim", "n.start", "m.sim", 
 						"startMethod", "zres", "presigma", "tailres", 
 						"preresiduals", "prereturns", "model", 
 						"mexsimdata", "vexsimdata","prerealized"), envir = environment())	
 		simlist = parLapply(cluster, as.list(1:m), fun = function(i){
 						maxx = mspec@spec[[i]]@model$maxOrder;
-						htmp = ugarchpath(mspec@spec[[i]], n.sim = n.sim + n.start, n.start = 0, m.sim = m.sim,
+						htmp = rugarch::ugarchpath(mspec@spec[[i]], n.sim = n.sim + n.start, n.start = 0, m.sim = m.sim,
 								custom.dist = list(name = "sample", distfit = matrix(zres[,i,1:m.sim], ncol = m.sim)),
 								presigma = tail(presigma[,i], maxx), 
 								preresiduals = if( is.null(preresiduals) ) tail(tailres[,i], maxx) else tail(preresiduals[,i], maxx), 
@@ -1980,7 +1980,7 @@
 	
 	if( !is.null(cluster) ){
 			tailres = fit@mfit$tailuresids
-			clusterEvalQ(cluster, library('rugarch'))
+			clusterEvalQ(cluster, loadNamespace('rugarch'))
 			clusterExport(cluster, c("mspec", "n.sim", "n.start", "m.sim", 
 							"startMethod", "zres", "presigma", "tailres",
 							"preresiduals", "prereturns", "model", "mexsimdata", 
@@ -1988,7 +1988,7 @@
 			simR = ures$simR
 			simlist = parLapply(cluster, as.list(1:m), fun = function(i){
 						maxx = mspec@spec[[i]]@model$maxOrder;
-						htmp = ugarchpath(mspec@spec[[i]], n.sim = n.sim + n.start, n.start = 0, m.sim = m.sim,
+						htmp = rugarch::ugarchpath(mspec@spec[[i]], n.sim = n.sim + n.start, n.start = 0, m.sim = m.sim,
 								custom.dist = list(name = "sample", distfit = matrix(zres[,i,1:m.sim], ncol = m.sim)),
 								presigma = tail(presigma[,i], maxx), 
 								preresiduals = if( is.null(preresiduals) ) tail(tailres[,i], maxx) else tail(preresiduals[,i], maxx), 

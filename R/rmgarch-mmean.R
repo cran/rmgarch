@@ -42,7 +42,7 @@ mvmean.varfit = function(model, data, VAR.fit = NULL, T, out.sample = 0, cluster
 			mp = model$modelinc[1+ggn]
 		}
 		p = mp
-		varmodel = varxfit(X = data[1:T, ,drop=FALSE], p = mp, exogen = ex[1:T, , drop=FALSE], 
+		varmodel = varxfit(X = data[1:T, ,drop=FALSE], p = mp, constant = TRUE, exogen = ex[1:T, , drop=FALSE], 
 				robust = model$varmodel$robust, gamma = model$varmodel$robust.control$gamma, 
 				delta = model$varmodel$robust.control$delta, nc = model$varmodel$robust.control$nc, 
 				ns = model$varmodel$robust.control$ns, postpad = "constant", cluster = cluster)
@@ -86,11 +86,11 @@ mvmean.arfit = function(model, data, ARcoef = NULL, T, out.sample = 0, solver,
 						arfima = FALSE, external.regressors = ex[1:T, , drop = FALSE]), 
 				distribution.model = "norm")
 		if( !is.null(cluster) ){
-			clusterEvalQ(cluster, library("rugarch"))
+			clusterEvalQ(cluster, loadNamespace("rugarch"))
 			clusterExport(cluster, c("T", "arspec", "data", "solver", 
 							"solver.control", "fit.control"), envir = environment())
 			arfit = parLapply(cluster, as.list(1:m), fun = function(i){
-						arfimafit(spec = arspec, data = data[1:T,i,drop=FALSE], 
+						rugarch::arfimafit(spec = arspec, data = data[1:T,i,drop=FALSE], 
 								out.sample = 0, solver = solver, 
 								solver.control = solver.control, 
 								fit.control = fit.control)
@@ -124,15 +124,15 @@ mvmean.arfit = function(model, data, ARcoef = NULL, T, out.sample = 0, solver,
 		p = model$modelinc[2]
 		# Irrespsective of the Distribution, the mean filtration is always Normal.
 		if( !is.null(cluster) ){
-			clusterEvalQ(cluster, library("rugarch"))
+			clusterEvalQ(cluster, loadNamespace("rugarch"))
 			clusterExport(cluster, c("T", "ARcoef", "data", "solver", 
 							"solver.control", "fit.control"), envir = environment())
 			arfit = parLapply(cluster, as.list(1:m), fun = function(i){
-							arspec = arfimaspec(mean.model = list(armaOrder = c(p, 0), 
+							arspec = rugarch::arfimaspec(mean.model = list(armaOrder = c(p, 0), 
 											include.mean = TRUE, arfima = FALSE, 
 											external.regressors = ex[1:T, , drop = FALSE]), 
 									distribution.model = "norm", fixed.pars = as.list(ARcoef[,i]));
-							ans = arfimafilter(spec = arspec, data = data[1:T,i,drop=FALSE], 
+							ans = rugarch::arfimafilter(spec = arspec, data = data[1:T,i,drop=FALSE], 
 									out.sample = 0);
 							return(ans)
 						})
@@ -234,16 +234,16 @@ mvmean.arfilter = function(model, data, arcoef, T, out.sample = 0, cluster = NUL
 	m = NCOL(data)
 	p = model$modelinc[2]
 	if( !is.null(cluster) ){
-			clusterEvalQ(cluster, library("rugarch"))
+			clusterEvalQ(cluster, loadNamespace("rugarch"))
 			clusterExport(cluster, c("T", "data", "p", "ex", "arcoef"), 
 					envir = environment())
 			armodel = parLapply(cluster, as.list(1:m), fun = function(i) {
-						specx = arfimaspec(mean.model = list(armaOrder = c(p, 0), 
+						specx = rugarch::arfimaspec(mean.model = list(armaOrder = c(p, 0), 
 										include.mean = TRUE, arfima = FALSE, 
 										external.regressors = ex[1:T, ]), 
 								distribution.model = "norm",
 								fixed.pars = as.list(arcoef[, i]))
-						ans = arfimafilter(spec = specx, data = data[1:T, i], out.sample = 0)
+						ans = rugarch::arfimafilter(spec = specx, data = data[1:T, i], out.sample = 0)
 						return(ans)
 					})
 
@@ -327,15 +327,15 @@ mvmean.arforecast = function(model, mregfor, arcoef, n.ahead, n.roll, ns, cluste
 	m = NCOL(model$modeldata$data)
 	tf = n.ahead + n.roll
 	if( !is.null(cluster) ){
-		clusterEvalQ(cluster, library("rugarch"))
+		clusterEvalQ(cluster, loadNamespace("rugarch"))
 		clusterExport(cluster, c("model", "arcoef", "mregfor", "ns", 
 						"n.ahead", "n.roll"), envir = environment())
 		arfx = parLapply(cluster, as.list(1:m), fun = function(i){
-					specx = arfimaspec(mean.model = list(armaOrder = c(model$modelinc[2], 0), 
+					specx = rugarch::arfimaspec(mean.model = list(armaOrder = c(model$modelinc[2], 0), 
 									include.mean = TRUE, arfima = FALSE, 
 									external.regressors = model$modeldata$mexdata), 
 							distribution.model = "norm", fixed.pars = as.list(arcoef[,i]))
-					ans = arfimaforecast(fitORspec = specx, data = model$modeldata$data[,i], 
+					ans = rugarch::arfimaforecast(fitORspec = specx, data = model$modeldata$data[,i], 
 							out.sample = ns, n.ahead = n.ahead, n.roll = n.roll, 
 							external.forecasts = list(mregfor = mregfor))
 					return(ans)
@@ -487,17 +487,17 @@ mvmean.arsim = function(model, Data, res, arcoef, mxn, mexdata, mexsimdata,
 	}
 	if( !is.null(cluster) ){
 			tres = matrix(tail(preresiduals, p), ncol = m)
-			clusterEvalQ(cluster, library("rugarch"))
+			clusterEvalQ(cluster, loadNamespace("rugarch"))
 			clusterExport(cluster, c("p", "ex", "arcoef", "mexsimdata", 
 							"res", "n.start", "tres", "n.sim", "m.sim", 
 							"prereturns"), envir = environment())
 			arxsim = parLapply(cluster, as.list(1:m), fun = function(i){
-						specx = arfimaspec(mean.model = list(armaOrder = c(p, 0), 
+						specx = rugarch::arfimaspec(mean.model = list(armaOrder = c(p, 0), 
 										include.mean = TRUE, arfima = FALSE, 
 										external.regressors = ex), 
 								distribution.model = "norm",
 								fixed.pars = as.list(arcoef[,i]))
-						ans = arfimapath(spec = specx, n.sim = n.sim, 
+						ans = rugarch::arfimapath(spec = specx, n.sim = n.sim, 
 								n.start = n.start, m.sim = m.sim, 
 								prereturns = if(p>0) tail(prereturns[,i],p) else NA,
 								preresiduals = if(p>0) tres[,i] else NA, 

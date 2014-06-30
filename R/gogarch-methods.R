@@ -2344,9 +2344,9 @@ betacoskew = function(object, ...)
 	b = rep(0, n)
 	if(!is.null(cluster)){
 		clusterExport(cluster, c("object","idx","asset","weights"), envir = environment())
-		clusterEvalQ(cluster, library(rmgarch))
+		clusterEvalQ(cluster, loadNamespace('rmgarch'))
 		ans = parLapply(cluster, 1:k, function(i){
-			S = rcoskew(object, from = idx[i,1], to = idx[i,2], standardize = FALSE)
+			S = rmgarch::rcoskew(object, from = idx[i,1], to = idx[i,2], standardize = FALSE)
 			d = c(dim(S), asset-1)
 			sol = as.numeric( .Call("tvbetacoskew", wi = weights[idx[i,1]:idx[i,2],,drop=FALSE], Si = S, di = as.integer(d), PACKAGE="rmgarch") )
 			return(sol)
@@ -2466,9 +2466,9 @@ betacokurt = function(object, ...)
 	
 	if(!is.null(cluster)){
 		clusterExport(cluster, c("object","idx","asset","weights"), envir = environment())
-		clusterEvalQ(cluster, library(rmgarch))
+		clusterEvalQ(cluster, loadNamespace('rmgarch'))
 		ans = parLapply(cluster, 1:k, function(i){
-					K = rcokurt(object, from = idx[i,1], to = idx[i,2], standardize = FALSE)
+					K = rmgarch::rcokurt(object, from = idx[i,1], to = idx[i,2], standardize = FALSE)
 					d = c(dim(K), asset-1)
 					sol = as.numeric( .Call("tvbetacokurt", wi = weights[idx[i,1]:idx[i,2],,drop=FALSE], Ki = K, di = as.integer(d), PACKAGE="rmgarch") )
 					return(sol)

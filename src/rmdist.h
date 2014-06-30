@@ -18,8 +18,9 @@
 #define _rmdist_H
 #undef trunc
 #undef ftrunc
+#define R_NO_REMAP
+#include <R.h>
 #include <RcppArmadillo.h>
-using namespace Rcpp;
 arma::rowvec rmvnormx(arma::mat , arma::rowvec );
 arma::rowvec rmvtx(arma::mat , const double , arma::rowvec );
 arma::rowvec rmvlx(arma::mat , arma::rowvec );

@@ -126,7 +126,7 @@ rcopula.student = function(n, U, Corr, df)
 {
 	m = dim(Corr)[2]
 	mu = rep(0, m)
-	ans = rugarch:::pstd(.rmvt(n, delta = mu, sigma = Corr, df = df), shape = df)
+	ans = rugarch:::pstd(.rmvt(n, mu = mu, R = Corr, df = df), mu=0, sigma=1, shape = df)
 	return ( ans )
 }
 
@@ -158,8 +158,8 @@ rcopula.student = function(n, U, Corr, df)
 	if(model$modeldesc$distribution == "mvt"){
 		for(i in 1:m.sim){
 			set.seed(rseed[i])
-			z[,,i] = rbind(preZ, .rmvt(n = (n.sim + n.start), delta = rep(0, m), 
-					sigma = diag(m), df = as.numeric(cf["mshape"])))
+			z[,,i] = rbind(preZ, .rmvt(n = (n.sim + n.start), mu = rep(0, m), 
+					R = diag(m), df = as.numeric(cf["mshape"])))
 		}
 	} else{
 		for(i in 1:m.sim){
@@ -190,7 +190,7 @@ rcopula.student = function(n, U, Corr, df)
 	Ures = vector(mode = "list", length = m)
 	Usim = array(NA, dim = c(n.sim+n.start, m, m.sim))
 	if(model$modeldesc$distribution  == "mvt"){
-		for(i in 1:m) Ures[[i]] = matrix(rugarch:::pstd(sapply(mtmp, FUN = function(x) x$Z[,i]), shape = cf["mshape"]), ncol = m.sim)
+		for(i in 1:m) Ures[[i]] = matrix(rugarch:::pstd(sapply(mtmp, FUN = function(x) x$Z[,i]), mu=0, sigma=1, shape = cf["mshape"]), ncol = m.sim)
 		for(i in 1:m.sim) Usim[,,i] = matrix(sapply(Ures, FUN = function(x) x[-(1:mo),i]), ncol = m)
 	} else{
 		for(i in 1:m) Ures[[i]] = pnorm(matrix(sapply(mtmp, FUN = function(x) x$Z[,i]), ncol = m.sim))
@@ -212,8 +212,8 @@ rcopula.student = function(n, U, Corr, df)
 		shape = cf["mshape"]
 		for(i in 1:m.sim){
 			set.seed(rseed[i])
-			tmp = .rmvt(n = nsim, delta = rep(0, m), sigma = Rbar, df = shape) 
-			sim[,,i] = matrix(rugarch:::pstd(tmp, shape = shape), nrow = nsim, ncol = m)
+			tmp = .rmvt(n = nsim, R = Rbar, df = shape, mu = rep(0, m))
+			sim[,,i] = matrix(rugarch:::pstd(tmp, mu=0, sigma=1, shape = shape), nrow = nsim, ncol = m)
 		}
 	} else{
 		for(i in 1:m.sim){
@@ -265,7 +265,7 @@ rcopula.student = function(n, U, Corr, df)
 	if (!all(ev$values >= -sqrt(.Machine$double.eps) * abs(ev$values[1]))) {
 		warning("sigma is numerically not positive definite")
 	}
-	retval <- ev$vectors %*% diag(sqrt(ev$values), length(ev$values)) %*% t(ev$vectors)
+	retval <- ev$vectors %*% diag(sqrt(ev$values), length(ev$values)) %*% solve(ev$vectors)
 	retval <- matrix(rnorm(n * ncol(sigma)), nrow = n) %*% retval
 	retval <- sweep(retval, 2, mean, "+")
 	colnames(retval) <- names(mean)
@@ -302,17 +302,14 @@ rcopula.student = function(n, U, Corr, df)
 }
 
 
-.rmvt = function (n, sigma = diag(2), df = 1, delta = rep(0, nrow(sigma)), type = c("shifted", "Kshirsagar")) 
+.rmvt = function (n, R = diag(2), df = 5, mu = rep(0, nrow(R)))
 {
-	if (length(delta) != nrow(sigma)) stop("delta and sigma have non-conforming size")
-	if (df == 0) return(.rmvnorm(n, mean = delta, sigma = sigma))
-	type <- match.arg(type)
-	if (type == "Kshirsagar"){
-		retval = .rmvnorm(n, mean = delta, sigma = sigma)/sqrt(rchisq(n, df)/df)
-	} else{
-		sims <- .rmvnorm(n, sigma = sigma)/sqrt(rchisq(n, df)/df)
-		retval = sweep(sims, 2, delta, "+")
-	}
+	if (length(mu) != nrow(R)) stop("mu and sigma have non-conforming size")
+	if (df == 0) return(.rmvnorm(n, mean = mu, sigma = R))
+	rc = rchisq(n, df)
+	RR = ((df-2)/df) * R
+	v = sqrt(df/rc)
+	retval = repmat(v,1,ncol(RR)) * .rmvnorm(n, mean = mu, sigma = RR)
 	return(retval)
 }
 

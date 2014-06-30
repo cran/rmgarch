@@ -398,12 +398,12 @@
 					variance.model = list(model = model$umodel$vmodel, garchOrder = model$umodel$garchOrder, 
 							submodel = model$umodel$vsubmodel, variance.targeting = FALSE), 
 					distribution.model = model$umodel$distribution, fixed.pars = as.list(fit@mfit$garchcoef[,i]))
-		clusterEvalQ(cluster, library("rugarch"))
+		clusterEvalQ(cluster, loadNamespace("rugarch"))
 		clusterExport(cluster, c("presig", "factor.preres", "sm", "specx", 
 						"n.sim", "n.start", "m.sim", "startMethod", "xseed"), 
 				envir = environment())
 		simlist = parLapply(cluster, as.list(1:m), fun = function(i){
-					ugarchpath(specx[[i]], n.sim = n.sim + n.start, n.start = 0, 
+					rugarch::ugarchpath(specx[[i]], n.sim = n.sim + n.start, n.start = 0, 
 							m.sim = m.sim, rseed = xseed[,i],
 							presigma = if(sm) presig[,i] else NA, 
 							preresiduals  = if(sm) factor.preres[,i] else NA)
