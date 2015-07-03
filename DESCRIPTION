@@ -1,14 +1,14 @@
 Package: rmgarch
 Type: Package
-Title: Multivariate GARCH models
-Version: 1.2-8
-Date: 2014-06-11
+Title: Multivariate GARCH Models
+Version: 1.2-9
+Date: 2015-07-02
 Author: Alexios Ghalanos <alexios@4dscape.com>
 Maintainer: Alexios Ghalanos <alexios@4dscape.com>
-Depends: R (>= 3.0.2), methods, rugarch
+Depends: R (>= 3.0.2), methods, rugarch, parallel
 LinkingTo: Rcpp (>= 0.10.6), RcppArmadillo (>= 0.2.34)
-Imports: Rsolnp, MASS, parallel, Matrix, zoo, xts, Bessel, ff, shape,
-        pcaPP, spd, Rcpp
+Imports: Rsolnp, MASS, Matrix, zoo, xts, Bessel, ff, shape, pcaPP, spd,
+        Rcpp, utils, graphics, stats, grDevices
 Description: Feasible multivariate GARCH models including DCC, GO-GARCH and Copula-GARCH.
 Collate: rmgarch-var.R rmgarch-functions.R rmgarch-classes.R
         rmgarch-ica.R rmgarch-series.R rmgarch-mmean.R
@@ -23,7 +23,7 @@ Collate: rmgarch-var.R rmgarch-functions.R rmgarch-classes.R
 LazyLoad: yes
 URL: http://www.unstarched.net, https://bitbucket.org/alexiosg
 License: GPL-3
-Packaged: 2014-06-30 15:48:13 UTC; alexios
 NeedsCompilation: yes
+Packaged: 2015-07-02 18:16:40 UTC; alexios
 Repository: CRAN
-Date/Publication: 2014-06-30 18:55:51
+Date/Publication: 2015-07-03 01:15:18
