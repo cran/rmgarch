@@ -20,12 +20,12 @@
 #------------------------------------------------------------------------------
 .gogarchspec = function(
 		mean.model = list(
-				model = c("constant", "AR", "VAR"), robust = FALSE, lag = 1, 
-				lag.max = NULL, lag.criterion = c("AIC", "HQ", "SC", "FPE"), 
-				external.regressors = NULL, robust.control = list("gamma" = 0.25, 
-						"delta" = 0.01, "nc" = 10, "ns" = 500)), 
-		variance.model = list(model = "sGARCH", garchOrder = c(1,1), submodel = NULL, 
-				variance.targeting = FALSE), distribution.model = c("mvnorm", "manig", "magh"), 
+				model = c("constant", "AR", "VAR"), robust = FALSE, lag = 1,
+				lag.max = NULL, lag.criterion = c("AIC", "HQ", "SC", "FPE"),
+				external.regressors = NULL, robust.control = list("gamma" = 0.25,
+						"delta" = 0.01, "nc" = 10, "ns" = 500)),
+		variance.model = list(model = "sGARCH", garchOrder = c(1,1), submodel = NULL,
+				variance.targeting = FALSE), distribution.model = c("mvnorm", "manig", "magh"),
 		ica = c("fastica", "radical"), ica.fix = list(A = NULL, K = NULL), ...)
 {
 	model = list()
@@ -33,10 +33,10 @@
 	modeldesc = list()
 	if(is.null(distribution.model)) distribution.model = "mvnorm"
 	vmodel = list(model = "sGARCH", garchOrder = c(1,1), submodel = NULL, variance.targeting = FALSE)
-	mmodel = list(model = c("constant"), robust = FALSE, lag = 1, lag.max = NULL, 
-			lag.criterion = c("AIC"), external.regressors = NULL, 
+	mmodel = list(model = c("constant"), robust = FALSE, lag = 1, lag.max = NULL,
+			lag.criterion = c("AIC"), external.regressors = NULL,
 			robust.control = list("gamma" = 0.25, "delta" = 0.01, "nc" = 10, "ns" = 500))
-	
+
 	distribution = distribution.model[1]
 	valid.distributions = c("mvnorm", "manig", "magh")
 	if(!any(distribution == valid.distributions)) stop("\nInvalid Distribution Choice\n", call. = FALSE)
@@ -45,8 +45,8 @@
 			manig = "nig",
 			magh = "ghyp")
 	modeldesc$distribution = distribution
-	
-	mmatch = match(names(mean.model), c("model", "robust", "lag", "lag.max", 
+
+	mmatch = match(names(mean.model), c("model", "robust", "lag", "lag.max",
 					"lag.criterion", "external.regressors", "robust.control"))
 	if(length(mmatch[!is.na(mmatch)]) > 0){
 		mx = which(!is.na(mmatch))
@@ -56,16 +56,16 @@
 	if(!any(mmodel$model[1] == valid.model)) stop("\ngogarchspec-->error: Invalid demean choice\n")
 	valid.criterion = c("AIC", "HQ", "SC", "FPE")
 	if(!any(mmodel$lag.criterion[1] == valid.criterion)) stop("\ngogarchspec-->error: Invalid VAR criterion choice\n")
-	
+
 	vmatch = match(names(variance.model), c("model", "garchOrder", "submodel", "variance.targeting"))
 	if(length(vmatch[!is.na(vmatch)]) > 0){
 		vx = which(!is.na(vmatch))
 		vmodel[vmatch[!is.na(vmatch)]] = variance.model[vx]
 	}
-	
+
 	modelinc = rep(0, 7)
 	names(modelinc) = c("constant", "ar", "var", "mvmxreg", "aux", "aux", "aux")
-	
+
 	modelinc[7] = which(valid.distributions == distribution)
 	if(mmodel$model == "VAR"){
 		if(is.null(mmodel$lag)) modelinc[3] = 1 else modelinc[3] = as.integer( mmodel$lag )
@@ -77,14 +77,14 @@
 	} else{
 		modeldata$mexdata = NULL
 	}
-	
+
 	varmodel = list()
 	if( modelinc[3]>0 ){
 		varmodel$robust = mmodel$robust
 		varmodel$lag.max = mmodel$lag.max
 		varmodel$lag.criterion = mmodel$lag.criterion[1]
 		varmodel$robust.control = mmodel$robust.control
-		
+
 	} else{
 		if(mmodel$model == "constant"){
 			varmodel$lag.max = 1
@@ -96,14 +96,14 @@
 			modelinc[2] = mmodel$lag
 		}
 	}
-	
+
 	umodel = list()
 	umodel$vmodel = vmodel$model
 	umodel$vsubmodel = vmodel$submodel
 	umodel$garchOrder = vmodel$garchOrder
 	umodel$variance.targeting = vmodel$variance.targeting
 	umodel$distribution = marginal
-	
+
 	if(is.null(ica)){
 		model$ica = "fastica"
 	} else{
@@ -111,14 +111,14 @@
 		if(!any(tolower(ica[1]) == valid.models)) stop("\ngogarchspec-->error: Invalid ICA model chosen\n", call. = FALSE)
 		model$ica = tolower(ica[1])
 	}
-	
+
 	if(is.null(ica.fix)) model$ica.fix = list() else model$ica.fix = ica.fix
-	
+
 	model$modelinc = modelinc
 	model$modeldata = modeldata
 	model$varmodel = varmodel
 	model$modeldesc = modeldesc
-	
+
 	ans = new("goGARCHspec",
 			model = model,
 			umodel = umodel)
@@ -126,14 +126,14 @@
 }
 
 gogarchspec = function(mean.model = list(
-				model = c("constant", "AR", "VAR"), robust = FALSE, lag = 1, 
-				lag.max = NULL, lag.criterion = c("AIC", "HQ", "SC", "FPE"), 
-				external.regressors = NULL, robust.control = list("gamma" = 0.25, 
-						"delta" = 0.01, "nc" = 10, "ns" = 500)), 
-		variance.model = list(model = "sGARCH", garchOrder = c(1,1), submodel = NULL, 
-				variance.targeting = FALSE), 
-		distribution.model = c("mvnorm", "manig", "magh"), 
-		ica = c("fastica", "radical"), 
+				model = c("constant", "AR", "VAR"), robust = FALSE, lag = 1,
+				lag.max = NULL, lag.criterion = c("AIC", "HQ", "SC", "FPE"),
+				external.regressors = NULL, robust.control = list("gamma" = 0.25,
+						"delta" = 0.01, "nc" = 10, "ns" = 500)),
+		variance.model = list(model = "sGARCH", garchOrder = c(1,1), submodel = NULL,
+				variance.targeting = FALSE),
+		distribution.model = c("mvnorm", "manig", "magh"),
+		ica = c("fastica", "radical"),
 		ica.fix = list(A = NULL, K = NULL), ...)
 {
 	UseMethod("gogarchspec")
@@ -144,8 +144,8 @@ setMethod("gogarchspec",  definition = .gogarchspec)
 #------------------------------------------------------------------------------
 # estimation (fit)
 #------------------------------------------------------------------------------
-gogarchfit = function(spec, data, out.sample = 0, solver = "solnp", 
-		fit.control = list(stationarity = 1), solver.control = list(), 
+gogarchfit = function(spec, data, out.sample = 0, solver = "solnp",
+		fit.control = list(stationarity = 1), solver.control = list(),
 		cluster = NULL, VAR.fit = NULL, ARcoef = NULL, ...)
 {
 	UseMethod("gogarchfit")
@@ -157,7 +157,7 @@ setMethod("gogarchfit",  signature(spec = "goGARCHspec"), definition = .gogarchf
 #------------------------------------------------------------------------------
 # filter
 #------------------------------------------------------------------------------
-gogarchfilter = function(fit, data, out.sample = 0, n.old = NULL, 
+gogarchfilter = function(fit, data, out.sample = 0, n.old = NULL,
 		cluster = NULL, ...)
 {
 	UseMethod("gogarchfilter")
@@ -169,7 +169,7 @@ setMethod("gogarchfilter",  signature(fit = "goGARCHfit"), definition = .gogarch
 #------------------------------------------------------------------------------
 # forecast
 #------------------------------------------------------------------------------
-gogarchforecast = function(fit, n.ahead = 10, n.roll = 0, 
+gogarchforecast = function(fit, n.ahead = 10, n.roll = 0,
 		external.forecasts = list(mregfor = NULL), cluster = NULL, ...)
 {
 	UseMethod("gogarchforecast")
@@ -180,29 +180,30 @@ setMethod("gogarchforecast",  signature(fit = "goGARCHfit"), definition = .gogar
 #------------------------------------------------------------------------------
 # simulation
 #------------------------------------------------------------------------------
-gogarchsim = function(fit, n.sim = 1, n.start = 0, m.sim = 1, 
-		startMethod = c("unconditional", "sample"), prereturns = NA, 
-		preresiduals = NA, presigma = NA, mexsimdata = NULL, rseed = NULL, 
+gogarchsim = function(object, n.sim = 1, n.start = 0, m.sim = 1,
+		startMethod = c("unconditional", "sample"), prereturns = NA,
+		preresiduals = NA, presigma = NA, mexsimdata = NULL, rseed = NULL,
 		cluster = NULL, ...)
 {
 	UseMethod("gogarchsim")
 }
 
-setMethod("gogarchsim",  signature(fit = "goGARCHfit"), definition = .gogarchsim)
+setMethod("gogarchsim",  signature(object = "goGARCHfit"), definition = .gogarchsim.fit)
+setMethod("gogarchsim",  signature(object = "goGARCHfilter"), definition = .gogarchsim.filter)
 
 #------------------------------------------------------------------------------
 # rolling estimation
 #------------------------------------------------------------------------------
-gogarchroll = function(spec, data, n.ahead = 1, forecast.length = 50, 
-		n.start = NULL, refit.every = 25, refit.window = c("recursive", "moving"), 
-		window.size = NULL, solver = "solnp", solver.control = list(), 
-		fit.control = list(), rseed = NULL,  cluster = NULL, save.fit = FALSE, 
+gogarchroll = function(spec, data, n.ahead = 1, forecast.length = 50,
+		n.start = NULL, refit.every = 25, refit.window = c("recursive", "moving"),
+		window.size = NULL, solver = "solnp", solver.control = list(),
+		fit.control = list(), rseed = NULL,  cluster = NULL, save.fit = FALSE,
 		save.wdir = NULL, ...)
 {
 	UseMethod("gogarchroll")
 }
 
-setMethod("gogarchroll",  signature(spec = "goGARCHspec"), definition = .rollgogarch) 
+setMethod("gogarchroll",  signature(spec = "goGARCHspec"), definition = .rollgogarch)
 #------------------------------------------------------------------------------
 # show
 #------------------------------------------------------------------------------
@@ -229,7 +230,7 @@ setMethod("show",
 			cat("\n")
 			invisible(object)
 		})
-		
+
 setMethod("show",
 		signature(object = "goGARCHfit"),
 		function(object){
@@ -394,7 +395,7 @@ setMethod("likelihood", signature(object = "goGARCHfilter"), .gogarchllh)
 	} else{
 		ans = ans[1:T,]^2
 		A = as.matrix(object, which = "A")
-		sol =  try(.Call("gogarchSigma", S = as.matrix(ans), 
+		sol =  try(.Call("gogarchSigma", S = as.matrix(ans),
 						A = as.matrix(A), PACKAGE = "rmgarch"), silent=TRUE)
 		if(inherits(sol, 'try-error')){
 			sol = t(apply(ans, 1, function(x) sqrt(diag(A%*%diag(x)%*%t(A)))))
@@ -427,7 +428,7 @@ setMethod("sigma", signature(object = "goGARCHfilter"), .gogarchfitsig)
 		ma = NCOL(A)
 		ans = array(NA, dim=c(n.ahead, m, n.roll+1))
 		for(i in 1:(n.roll+1)){
-			ans[,,i] = sqrt(.Call("gogarchSigma", S = matrix(Sx[,,i]^2, ncol = ma), 
+			ans[,,i] = sqrt(.Call("gogarchSigma", S = matrix(Sx[,,i]^2, ncol = ma),
 					A = A, PACKAGE = "rmgarch"))
 		}
 		nams = object@model$modeldata$asset.names
@@ -451,7 +452,7 @@ setMethod("sigma", signature(object = "goGARCHforecast"), .gogarchforcsig)
 	} else{
 		A = as.matrix(object, which = "A")
 		ma = NCOL(A)
-		ans = sqrt(.Call("gogarchSigma", S = matrix(ans^2, ncol = ma), 
+		ans = sqrt(.Call("gogarchSigma", S = matrix(ans^2, ncol = ma),
 							A = A, PACKAGE = "rmgarch"))
 		colnames(ans) = object@model$modeldata$asset.names
 	}
@@ -586,7 +587,7 @@ as.matgofit = function(x, rownames.force = NA, which = "A")
 {
 	validmat = c("A", "W", "U", "K", "Kinv", "E", "D")
 	if(!any(tolower(which) == tolower(validmat))) stop("Invalid type for gogarch matrix chosen. Valid choices as A, W, U, K, Kinv, E, and D.", call. = FALSE)
-	Z = switch(class(x)[1], 
+	Z = switch(class(x)[1],
 			goGARCHfit = x@mfit,
 			goGARCHfilter = x@mfilter,
 			goGARCHforecast = x@mforecast,
@@ -614,7 +615,7 @@ rcov = function(object, ...)
 	UseMethod("rcov")
 }
 
-.rcovgarch = function(object, type = 1)
+.rcovgarch = function(object, type = 1, output=c("array","matrix"))
 {
 	A = as.matrix(object, which = "A")
 	sig = as.matrix(sigma(object))^2
@@ -644,13 +645,16 @@ rcov = function(object, ...)
 		}
 		dimnames(V) = list(nam, nam, D)
 	}
+	if(output[1]=="matrix"){
+	  V = array2matrix(V, date=as.Date(D), var.names=nam, diag=TRUE)
+	}
 	return( V )
 }
 
 setMethod("rcov", signature(object = "goGARCHfit"), .rcovgarch)
 setMethod("rcov", signature(object = "goGARCHfilter"), .rcovgarch)
 
-.rcovgarchf = function(object, type = 1)
+.rcovgarchf = function(object, type = 1, output=c("array","matrix"))
 {
 	A = as.matrix(object, which = "A")
 	sig = sigma(object)^2
@@ -679,18 +683,21 @@ setMethod("rcov", signature(object = "goGARCHfilter"), .rcovgarch)
 			dimnames(H[[i]]) = list(nam, nam, paste("T+",1:n.ahead,sep=""))
 		}
 	}
+	if(output[1]=="matrix"){
+	  for(i in 1:(n.roll+1)) H[[i]] = array2matrix(H[[i]], date=paste("T+",1:n.ahead,sep=""), var.names=nam, diag=TRUE)
+	}
 	#attr(H, "T0") = D
 	return( H )
 }
 setMethod("rcov", signature(object = "goGARCHforecast"), .rcovgarchf)
 
-.rcovgarchsim = function(object, type = 1, sim = 1)
+.rcovgarchsim = function(object, type = 1, sim = 1, output=c("array","matrix"))
 {
 	m.sim = object@msim$m.sim
 	if(sim > m.sim) stop("\nsim > m.sim!", call. = FALSE)
 	A = object@msim$A
 	sig = sigma(object, sim = sim)^2
-	if(!is.matrix(sig)) sig = matrix(sig, ncol = NCOL(A))	
+	if(!is.matrix(sig)) sig = matrix(sig, ncol = NCOL(A))
 	n = NROW(sig)
 	# for dimensionality reduced systems
 	if(type == 1) m = NROW(A) else m = NCOL(A)
@@ -707,13 +714,16 @@ setMethod("rcov", signature(object = "goGARCHforecast"), .rcovgarchf)
 		}
 		dimnames(V) = list(nam, nam, 1:n)
 	}
+	if(output[1]=="matrix"){
+	  V = array2matrix(V, date=as.character(1:n), var.names=nam, diag=TRUE)
+	}
 	return( V )
 }
 
 setMethod("rcov", signature(object = "goGARCHsim"), .rcovgarchsim)
 
 
-.rcovroll = function(object, type = 1)
+.rcovroll = function(object, type = 1, output=c("array","matrix"))
 {
 	rind = object@model$rollind
 	index = object@model$index
@@ -726,7 +736,7 @@ setMethod("rcov", signature(object = "goGARCHsim"), .rcovgarchsim)
 	dm = dim(X[[1]])
 	X = array(sapply(X, function(x) x), dim = c(dm[1], dm[1], s[1]))
 	D = as.character(tail(index[rind[[1]]], s[1]))
-	if(n>1){ 
+	if(n>1){
 		for(i in 2:n){
 		D = c(D, as.character(tail(index[rind[[i]]], s[i])))
 		tmp = array(sapply(rcov(object@forecast[[i]], type), function(x) x),
@@ -735,6 +745,9 @@ setMethod("rcov", signature(object = "goGARCHsim"), .rcovgarchsim)
 		}
 	}
 	dimnames(X) = list(nam, nam, D)
+	if(output[1]=="matrix"){
+	  X = array2matrix(X, date=as.Date(D), var.names=nam, diag=TRUE)
+	}
 	return(X)
 }
 
@@ -749,7 +762,7 @@ rcor = function(object, ...)
 	UseMethod("rcor")
 }
 
-.rcorgarch = function(object)
+.rcorgarch = function(object, output=c("array","matrix"))
 {
 	A = as.matrix(object, which = "A")
 	sig = as.matrix(sigma(object))^2
@@ -761,13 +774,16 @@ rcor = function(object, ...)
 	nam = object@model$modeldata$asset.names
 	R = try(.Call("gogarchCor", S = sig, A = A, PACKAGE = "rmgarch"), silent=TRUE)
 	dimnames(R) = list(nam, nam, D)
+	if(output[1]=="matrix"){
+	  R = array2matrix(R, date=as.Date(D), var.names=nam, diag=FALSE)
+	}
 	return( R )
 }
 
 setMethod("rcor", signature(object = "goGARCHfit"), .rcorgarch)
 setMethod("rcor", signature(object = "goGARCHfilter"), .rcorgarch)
 
-.rcorgarchf = function(object)
+.rcorgarchf = function(object, output=c("array","matrix"))
 {
 	A = as.matrix(object, which = "A")
 	sig = sigma(object)^2
@@ -784,29 +800,35 @@ setMethod("rcor", signature(object = "goGARCHfilter"), .rcorgarch)
 	}
 	# attr(R, "T0") = D
 	names(R) = D
+	if(output[1]=="matrix"){
+	  for(i in 1:(n.roll+1)) R[[i]] = array2matrix(R[[i]], date=paste("T+",1:n.ahead,sep=""), var.names=nam, diag=FALSE)
+	}
 	return( R )
 }
 setMethod("rcor", signature(object = "goGARCHforecast"), .rcorgarchf)
 
 
-.rcorgarchsim = function(object, sim = 1)
+.rcorgarchsim = function(object, sim = 1, output=c("array","matrix"))
 {
 	m.sim = object@msim$m.sim
 	if(sim > m.sim) stop("\nsim > m.sim!", call. = FALSE)
 	A = object@msim$A
 	sig = sigma(object, sim = sim)^2
-	if(!is.matrix(sig)) sig = matrix(sig, ncol = NCOL(A))	
+	if(!is.matrix(sig)) sig = matrix(sig, ncol = NCOL(A))
 	n = NROW(sig)
 	m = NROW(A)
 	nam = object@model$modeldata$asset.names
 	R = try(.Call("gogarchCor", S = sig, A = A, PACKAGE = "rmgarch"), silent=TRUE)
 	dimnames(R) = list(nam, nam, 1:n)
+	if(output[1]=="matrix"){
+	  R = array2matrix(R, date=as.character(1:n), var.names=nam, diag=FALSE)
+	}
 	return( R )
 }
 
 setMethod("rcor", signature(object = "goGARCHsim"), .rcorgarchsim)
 
-.rcorroll = function(object)
+.rcorroll = function(object, output=c("array","matrix"))
 {
 	rind = object@model$rollind
 	index = object@model$index
@@ -819,7 +841,7 @@ setMethod("rcor", signature(object = "goGARCHsim"), .rcorgarchsim)
 	dm = dim(X[[1]])
 	X = array(sapply(X, function(x) x), dim = c(dm[1], dm[1], s[1]))
 	D = as.character(tail(index[rind[[1]]], s[1]))
-	if(n>1){ 
+	if(n>1){
 		for(i in 2:n){
 			D = c(D, as.character(tail(index[rind[[i]]], s[i])))
 			tmp = array(sapply(rcor(object@forecast[[i]]), function(x) x),
@@ -828,6 +850,9 @@ setMethod("rcor", signature(object = "goGARCHsim"), .rcorgarchsim)
 		}
 	}
 	dimnames(X) = list(nam, nam, D)
+	if(output[1]=="matrix"){
+	  X = array2matrix(X, date=as.Date(D), var.names=nam, diag=FALSE)
+	}
 	return(X)
 }
 
@@ -863,7 +888,7 @@ rcoskew = function(object, ...)
 		} else{
 			S3 = dskewness("nig", skew = skew, shape = shape)
 		}
-		# convert to moments since the standardized moments do not retain their 
+		# convert to moments since the standardized moments do not retain their
 		# geometric properties in transformation
 		yskew = matrix(S3, ncol = NCOL(sig), nrow = NROW(sig), byrow = TRUE)*(sig^3)
 		Z = as(t(A), "dgeMatrix")
@@ -872,7 +897,7 @@ rcoskew = function(object, ...)
 			K = .coskew.ind(yskew[i,])
 			lhs = A%*%K
 			xs[,,i] = fast_kron_M(rhs, lhs, m, p=2)
-		}		
+		}
 		if(standardize){
 			for(i in 1:n.roll){
 				SD = sqrt(diag(A%*%diag(sig[i,]^2)%*%t(A)))
@@ -910,7 +935,7 @@ rcoskew = function(object, ...)
 		} else{
 			S3 = dskewness("nig", skew = skew, shape = shape)
 		}
-		# convert to moments since the standardized moments do not retain their 
+		# convert to moments since the standardized moments do not retain their
 		# geometric properties in transformation
 		yskew = matrix(S3, ncol = NCOL(sig), nrow = NROW(sig), byrow = TRUE)*(sig^3)
 		Z = as(t(A), "dgeMatrix")
@@ -966,7 +991,7 @@ setMethod("rcoskew", signature(object = "goGARCHroll"), .rcoskewroll)
 .rcoskewsim = function(object, standardize = TRUE, from = 1, to = 1, sim = 1)
 {
 	mdist = object@model$modeldesc$distribution
-	if(mdist == "mvnorm") stop("\nNo co-skewness for mvnorm distribution\n", call. = FALSE)	
+	if(mdist == "mvnorm") stop("\nNo co-skewness for mvnorm distribution\n", call. = FALSE)
 	m.sim = object@msim$m.sim
 	if(sim > m.sim) stop("\nsim > m.sim!", call. = FALSE)
 	n = length(seq(from, to, by = 1))
@@ -1034,7 +1059,7 @@ rcokurt = function(object, ...)
 		} else{
 			S4 = dkurtosis("nig", skew = skew, shape = shape)+3
 		}
-		# convert to moments since the standardized moments do not retain their 
+		# convert to moments since the standardized moments do not retain their
 		# geometric properties in transformation
 		ykurt = matrix(S4, ncol = NCOL(sig), nrow = NROW(sig), byrow = TRUE)*(sig^4)
 		Z = as(kronecker(t(A), t(A)), "dgeMatrix")
@@ -1075,7 +1100,7 @@ rcokurt = function(object, ...)
 		}
 		n = length(seq(from, to, by = 1))
 		if( n>100 ) stop("\nMaximum from/to is 100 points due to size restrictions\n", .call = FALSE)
-	
+
 		xs = array(NA, dim = c(m , m^3, n))
 		skew = coef(object)["skew",]
 		shape = coef(object)["shape",]
@@ -1166,7 +1191,7 @@ setMethod("rcokurt", signature(object = "goGARCHroll"), .rcokurtroll)
 		K = .cokurt.ind(sig[i,]^2, ykurt[i,])
 		lhs = A%*%K
 		xs[,,i] = fast_kron_M(rhs, lhs, m, p=3)
-	}	
+	}
 	if(standardize){
 		for(i in 1:n){
 			SD = sqrt(diag(A%*%diag(sig[i,]^2)%*%t(A)))
@@ -1181,7 +1206,7 @@ setMethod("rcokurt", signature(object = "goGARCHsim"), .rcokurtsim)
 ###############################################################################
 #------------------------------------------------------------------------------
 # Geometric Portfolio Moments
-# 
+#
 gportmoments = function(object, ...)
 {
 	UseMethod("gportmoments")
@@ -1213,7 +1238,7 @@ gportmoments = function(object, ...)
 		pmom = matrix(NA, ncol = 3, nrow = n)
 		colnames(pmom) = c("mu", "sigma", "skewness")
 	}
-	
+
 	S = rcov(object)
 	mu = matrix(fitted(object), ncol = m)
 	# write C++ function
@@ -1273,7 +1298,7 @@ setMethod("gportmoments", signature(object = "goGARCHfilter"), .gportmoments)
 			if(m< 100) pmom[1,4,i] = (w%*%rcokurt(object, standardize = FALSE, from = 1, to = 1, roll=i-1)[,,1]%*%kronecker(t(w), kronecker(t(w), t(w)))/pmom[1,2,i]^4)
 			if(debug) print(i)
 		}
-		
+
 	} else{
 		for(i in 1:n.ahead){
 			w = weights[i,,drop=FALSE]
@@ -1308,12 +1333,12 @@ setMethod("gportmoments", signature(object = "goGARCHforecast"), .gportmomentsf)
 		mm = NCOL(weights)
 		if(mm != m) stop("\nIncorrect column dimension for weights matrix\n", call. = FALSE)
 		if(nn != T) stop("\nIncorrect row dimension for weights matrix\n", call. = FALSE)
-	}	
+	}
 	pmom = matrix(gportmoments(object@forecast[[1]], weights = weights[1:s[1],,drop=FALSE]), ncol = 4, nrow = s[1], byrow=TRUE)
 	if(n>1){
 		for(i in 2:n){
 			D = c(D, as.character(tail(index[rind[[i]]], s[i])))
-			tmp = matrix(gportmoments(object@forecast[[i]], weights = weights[(sum(s[1:(i-1)])+1):(sum(s[1:(i)])),,drop=FALSE]), 
+			tmp = matrix(gportmoments(object@forecast[[i]], weights = weights[(sum(s[1:(i-1)])+1):(sum(s[1:(i)])),,drop=FALSE]),
 					ncol = 4, nrow = s[i], byrow=TRUE)
 			pmom = rbind(pmom, tmp)
 		}
@@ -1331,7 +1356,7 @@ setMethod("gportmoments", signature(object = "goGARCHroll"), .gportmoments.garch
 	m.sim = object@msim$m.sim
 	if(sim > m.sim) stop("\nsim > m.sim!", call. = FALSE)
 	A = object@msim$A
-	if(!is.matrix(object@msim$factor.sigmaSim[[sim]])) n = 1 else n = NROW(object@msim$factor.sigmaSim[[sim]])	
+	if(!is.matrix(object@msim$factor.sigmaSim[[sim]])) n = 1 else n = NROW(object@msim$factor.sigmaSim[[sim]])
 	m = NROW(A)
 	if(is.vector(weights)){
 		if(length(weights) != m) stop("\nIncorrect weight vector length\n", call. = FALSE)
@@ -1343,7 +1368,7 @@ setMethod("gportmoments", signature(object = "goGARCHroll"), .gportmoments.garch
 		if(nn != n) stop("\nIncorrect row dimension for weights matrix\n", call. = FALSE)
 	}
 	if(m < 100) pmom = matrix(NA, ncol = 4, nrow = n) else pmom = matrix(NA, ncol = 3, nrow = n)
-	
+
 	S = rcov(object)
 	for(i in 1:n){
 		w = weights[i,,drop=FALSE]
@@ -1371,9 +1396,9 @@ nportmoments = function(object, ...)
 {
 	md = object@dist$dist
 	ans = switch(md,
-			manig = .nmoments.fft(object, subdivisions = subdivisions, 
+			manig = .nmoments.fft(object, subdivisions = subdivisions,
 					rel.tol = rel.tol, trace = trace, ...),
-			magh = .nmoments.fft(object, subdivisions = subdivisions, 
+			magh = .nmoments.fft(object, subdivisions = subdivisions,
 					rel.tol = rel.tol, trace = trace, ...),
 			mvnorm = .nmoments.lin(object))
 	return(ans)
@@ -1414,7 +1439,7 @@ setMethod("nportmoments", signature(object = "goGARCHfft"), .nportmoments)
 		yd = object@dist$y
 		N = length(yd)
 		nmom = matrix(NA, ncol = 4, nrow = N)
-		
+
 		for(i in 1:N){
 			xpdf = seq(object@dist$support.user[i, 1], object@dist$support.user[i, 2], by = object@dist$fft.by)
 			dmad = .makeDNew(x = xpdf, dx = yd[[i]], h = object@dist$fft.by, standM = "sum")
@@ -1477,8 +1502,8 @@ convolution = function(object, ...)
 }
 
 
-.convolution = function(object, weights, fft.step = 0.001, 
-		fft.by = 0.0001, fft.support = c(-1, 1), support.method = c("user", "adaptive"), 
+.convolution = function(object, weights, fft.step = 0.001,
+		fft.by = 0.0001, fft.support = c(-1, 1), support.method = c("user", "adaptive"),
 		use.ff = TRUE, cluster = NULL, trace = 0, ...)
 {
 	dist = object@model$modeldesc$distribution
@@ -1501,15 +1526,15 @@ convolution = function(object, ...)
 	model$modtype = modtype
 	debug = as.logical(trace)
 	ans = switch(dist,
-			manig = .convolve.nig(nigpars = pars, M2 = M2, M1 = M1, A = A, 
-					weights = weights, fft.step = fft.step, fft.by = fft.by, 
-					fft.support = fft.support, use.ff = use.ff, 
-					support.method = support.method, cluster = cluster, 
+			manig = .convolve.nig(nigpars = pars, M2 = M2, M1 = M1, A = A,
+					weights = weights, fft.step = fft.step, fft.by = fft.by,
+					fft.support = fft.support, use.ff = use.ff,
+					support.method = support.method, cluster = cluster,
 					model = model, debug = debug),
-			magh = .convolve.gh(ghpars = pars, M2 = M2, M1 = M1, A = A, 
-					weights = weights, fft.step = fft.step, fft.by = fft.by, 
-					fft.support = fft.support, use.ff = use.ff, 
-					support.method = support.method, cluster = cluster, 
+			magh = .convolve.gh(ghpars = pars, M2 = M2, M1 = M1, A = A,
+					weights = weights, fft.step = fft.step, fft.by = fft.by,
+					fft.support = fft.support, use.ff = use.ff,
+					support.method = support.method, cluster = cluster,
 					model = model, debug = debug),
 			mvnorm = .convolve.norm(M2 = M2, M1 = M1, A = A, weights = weights,
 					model = model))
@@ -1519,8 +1544,8 @@ setMethod("convolution", signature(object = "goGARCHfit"), .convolution)
 setMethod("convolution", signature(object = "goGARCHfilter"), .convolution)
 
 
-.convolutionf = function(object, weights, fft.step = 0.001, 
-		fft.by = 0.0001, fft.support = c(-1, 1), support.method = c("user", "adaptive"), 
+.convolutionf = function(object, weights, fft.step = 0.001,
+		fft.by = 0.0001, fft.support = c(-1, 1), support.method = c("user", "adaptive"),
 		use.ff = TRUE, cluster = NULL, trace = 0, ...)
 {
 	dist = object@model$modeldesc$distribution
@@ -1556,15 +1581,15 @@ setMethod("convolution", signature(object = "goGARCHfilter"), .convolution)
 	model$modtype = modtype
 	debug = as.logical(trace)
 	ans = switch(dist,
-			manig = .convolve.nig(nigpars = pars, M2 = M2, M1 = M1, A = A, 
-					weights = weights, fft.step = fft.step, fft.by = fft.by, 
-					fft.support = fft.support, use.ff = use.ff, 
-					support.method = support.method, cluster = cluster, 
+			manig = .convolve.nig(nigpars = pars, M2 = M2, M1 = M1, A = A,
+					weights = weights, fft.step = fft.step, fft.by = fft.by,
+					fft.support = fft.support, use.ff = use.ff,
+					support.method = support.method, cluster = cluster,
 					model = model, debug = debug),
-			magh = .convolve.gh(ghpars = pars, M2 = M2, M1 = M1, A = A, 
-					weights = weights, fft.step = fft.step, fft.by = fft.by, 
-					fft.support = fft.support, use.ff = use.ff, 
-					support.method = support.method, cluster = cluster, 
+			magh = .convolve.gh(ghpars = pars, M2 = M2, M1 = M1, A = A,
+					weights = weights, fft.step = fft.step, fft.by = fft.by,
+					fft.support = fft.support, use.ff = use.ff,
+					support.method = support.method, cluster = cluster,
 					model = model, debug = debug),
 			mvnorm = .convolve.norm(M2 = M2, M1 = M1, A = A, weights = weights,
 					model = model))
@@ -1573,8 +1598,8 @@ setMethod("convolution", signature(object = "goGARCHfilter"), .convolution)
 setMethod("convolution", signature(object = "goGARCHforecast"), .convolutionf)
 
 
-.convolution.gogarchsim = function(object, weights, fft.step = 0.001, 
-		fft.by = 0.0001, fft.support = c(-1, 1), support.method = c("user", "adaptive"), 
+.convolution.gogarchsim = function(object, weights, fft.step = 0.001,
+		fft.by = 0.0001, fft.support = c(-1, 1), support.method = c("user", "adaptive"),
 		use.ff = TRUE, sim = 1, cluster = NULL, trace = 0, ...)
 {
 	dist = object@model$modeldesc$distribution
@@ -1597,15 +1622,15 @@ setMethod("convolution", signature(object = "goGARCHforecast"), .convolutionf)
 	model$modtype = modtype
 	debug = as.logical(trace)
 	ans = switch(dist,
-			manig = .convolve.nig(nigpars = pars, M2 = M2, M1 = M1, A = A, 
-					weights = weights, fft.step = fft.step, fft.by = fft.by, 
-					fft.support = fft.support, use.ff = use.ff, 
-					support.method = support.method, cluster = cluster, 
+			manig = .convolve.nig(nigpars = pars, M2 = M2, M1 = M1, A = A,
+					weights = weights, fft.step = fft.step, fft.by = fft.by,
+					fft.support = fft.support, use.ff = use.ff,
+					support.method = support.method, cluster = cluster,
 					model = model, debug = debug),
-			magh = .convolve.gh(ghpars = pars, M2 = M2, M1 = M1, A = A, 
-					weights = weights, fft.step = fft.step, fft.by = fft.by, 
-					fft.support = fft.support, use.ff = use.ff, 
-					support.method = support.method, cluster = cluster, 
+			magh = .convolve.gh(ghpars = pars, M2 = M2, M1 = M1, A = A,
+					weights = weights, fft.step = fft.step, fft.by = fft.by,
+					fft.support = fft.support, use.ff = use.ff,
+					support.method = support.method, cluster = cluster,
 					model = model, debug = debug),
 			mvnorm = .convolve.norm(M2 = M2, M1 = M1, A = A, weights = weights, model = model))
 	return(ans)
@@ -1613,8 +1638,8 @@ setMethod("convolution", signature(object = "goGARCHforecast"), .convolutionf)
 
 setMethod("convolution", signature(object = "goGARCHsim"), .convolution.gogarchsim)
 
-.convolution.gogarchroll = function(object, weights, fft.step = 0.001, 
-		fft.by = 0.0001, fft.support = c(-1, 1), support.method = c("user", "adaptive"), 
+.convolution.gogarchroll = function(object, weights, fft.step = 0.001,
+		fft.by = 0.0001, fft.support = c(-1, 1), support.method = c("user", "adaptive"),
 		use.ff = TRUE, cluster = NULL, trace = 0, ...)
 {
 	dist = object@model$modeldesc$distribution
@@ -1626,11 +1651,11 @@ setMethod("convolution", signature(object = "goGARCHsim"), .convolution.gogarchs
 	debug = as.logical(trace)
 	ans = switch(dist,
 			mvnorm = .convolve.roll.mn(object, weights, model, ...),
-			manig = .convolve.roll.nig(object, weights, fft.step, fft.by, 
-					fft.support, support.method, use.ff, cluster = cluster, 
+			manig = .convolve.roll.nig(object, weights, fft.step, fft.by,
+					fft.support, support.method, use.ff, cluster = cluster,
 					model, trace, ...),
-			magh = .convolve.roll.nig(object, weights, fft.step, fft.by, 
-					fft.support, support.method, use.ff, 
+			magh = .convolve.roll.nig(object, weights, fft.step, fft.by,
+					fft.support, support.method, use.ff,
 					cluster = cluster, model, trace, ...))
 	return(ans)
 }
@@ -1641,7 +1666,7 @@ setMethod("convolution", signature(object = "goGARCHsim"), .convolution.gogarchs
 	fseq = object@model$out.sample
 	forecast.length = sum(fseq)
 	m = NROW(object@forecast[[1]]@mforecast$A)
-	
+
 	if(is.matrix(weights)){
 		if(dim(weights)[2] != m) stop("\nconvolution-->error: Weights column dimension not equal to data column dimension!")
 		if(dim(weights)[1] != forecast.length) stop("\nconvolution-->error: Weights row dimension must equal floor(forecast.length/refit.every) * refit.every")
@@ -1654,7 +1679,7 @@ setMethod("convolution", signature(object = "goGARCHsim"), .convolution.gogarchs
 	idx[,1] = c(1, cfseq[-length(cfseq)]+1)
 	idx[,2] = cfseq
 	rpdf = matrix(NA, ncol = 2, nrow = forecast.length)
-	
+
 	for(i in 1:nf){
 		tmp = .convolution(object@forecast[[i]], weights = weights[idx[i,1]:idx[i,2],,drop = FALSE])
 		rpdf[idx[i,1]:idx[i,2], ] = tmp@dist$y
@@ -1681,15 +1706,15 @@ setMethod("convolution", signature(object = "goGARCHsim"), .convolution.gogarchs
 	return(ans)
 }
 
-.convolve.roll.nig = function(object, weights, fft.step, fft.by, 
-		fft.support, support.method = c("user", "adaptive"), 
+.convolve.roll.nig = function(object, weights, fft.step, fft.by,
+		fft.support, support.method = c("user", "adaptive"),
 		use.ff = TRUE, cluster = NULL, model, trace = 0, ...)
 {
 	dist = object@model$modeldesc$distribution
 	fseq = object@model$out.sample
 	forecast.length = sum(fseq)
 	m = NROW(object@forecast[[1]]@mforecast$A)
-	
+
 	if(is.matrix(weights)){
 		if(dim(weights)[2] != m) stop("\nconvolution-->error: Weights column dimension not equal to data column dimension!")
 		if(dim(weights)[1] != forecast.length) stop("\nconvolution-->error: Weights row dimension must equal floor(forecast.length/refit.every) * refit.every")
@@ -1697,37 +1722,37 @@ setMethod("convolution", signature(object = "goGARCHsim"), .convolution.gogarchs
 		weights = matrix(weights, ncol = m, nrow = forecast.length, byrow = TRUE)
 	}
 	nf = length(object@forecast)
-	
+
 	idx = matrix(NA, ncol = 2, nrow = nf)
 	cfseq = cumsum(fseq)
 	idx[,1] = c(1, cfseq[-length(cfseq)]+1)
 	idx[,2] = cfseq
-	
+
 	support.user = NULL
-	
+
 	if( support.method == "user" ){
 		zz = seq(fft.support[1], fft.support[2], by = fft.by)
 		if(use.ff){
-			rpdf = ff(vmode="double", dim=c(length(zz), forecast.length)) 
+			rpdf = ff(vmode="double", dim=c(length(zz), forecast.length))
 		} else{
 			rpdf = matrix(NA, nrow = length(zz), ncol = forecast.length)
 		}
-		
+
 		for(i in 1:nf){
-			tmp = .convolutionf(object@forecast[[i]], 
-					weights = weights[idx[i,1]:idx[i,2],,drop = FALSE], 
-					fft.step = fft.step, fft.by = fft.by, fft.support = fft.support, 
-					support.method = support.method, use.ff = use.ff, 
+			tmp = .convolutionf(object@forecast[[i]],
+					weights = weights[idx[i,1]:idx[i,2],,drop = FALSE],
+					fft.step = fft.step, fft.by = fft.by, fft.support = fft.support,
+					support.method = support.method, use.ff = use.ff,
 					cluster = cluster, trace = trace)
 			rpdf[1:length(zz), idx[i,1]:idx[i,2]] = tmp@dist$y[1:length(zz), 1:fseq[i]]
 		}
 	} else{
 		rpdf = NULL
 		for(i in 1:nf){
-			tmp = .convolutionf(object@forecast[[i]], 
-					weights =  weights[idx[i,1]:idx[i,2],,drop = FALSE], 
-					fft.step = fft.step, fft.by = fft.by, fft.support = fft.support, 
-					support.method = support.method, use.ff = use.ff, 
+			tmp = .convolutionf(object@forecast[[i]],
+					weights =  weights[idx[i,1]:idx[i,2],,drop = FALSE],
+					fft.step = fft.step, fft.by = fft.by, fft.support = fft.support,
+					support.method = support.method, use.ff = use.ff,
 					cluster = cluster, trace = trace)
 			rpdf = c(rpdf, tmp@dist$y)
 			support.user = rbind(support.user, tmp@dist$support.user)
@@ -1760,8 +1785,8 @@ setMethod("convolution", signature(object = "goGARCHroll"), .convolution.gogarch
 
 
 # maNIG convolution of independent densities
-.convolve.nig = function(nigpars, M2, M1, A, weights, fft.step = 0.001, 
-		fft.by = 0.0001, fft.support = c(-1, 1), support.method = c("user", "adaptive"), 
+.convolve.nig = function(nigpars, M2, M1, A, weights, fft.step = 0.001,
+		fft.by = 0.0001, fft.support = c(-1, 1), support.method = c("user", "adaptive"),
 		use.ff = TRUE, cluster = NULL, model, debug = 0)
 {
 	sol = list()
@@ -1770,7 +1795,7 @@ setMethod("convolution", signature(object = "goGARCHroll"), .convolution.gogarch
 	if(!is.matrix(weights)) weights = matrix(weights[1:NROW(A)], ncol = NROW(A), nrow = n, byrow = TRUE)
 	if(NCOL(weights) != NROW(A))
 		stop("\nconvolution-->error: wrong no. of columns for weights matrix.", call. = FALSE)
-	if(NROW(weights) != n) 
+	if(NROW(weights) != n)
 		stop("\nconvolution-->error: wrong no. of rows for weights matrix.", call. = FALSE)
 	# The weighting vector for the distribution
 	w.hat = matrix(NA, ncol = m, nrow = n)
@@ -1807,20 +1832,20 @@ setMethod("convolution", signature(object = "goGARCHroll"), .convolution.gogarch
 		}
 		if( !is.null(cluster) ){
 			clusterEvalQ(cluster, require(rmgarch))
-			clusterExport(cluster, c("zz", "fft.step", "wpars","cfinv","nigmvcf"), 
+			clusterExport(cluster, c("zz", "fft.step", "wpars","cfinv","nigmvcf"),
 					envir = environment())
 			xpdf = parLapply(cluster, as.list(1:n), fun = function(i){
-						cfinv(z = zz, f = nigmvcf, 
-								step = fft.step, alpha = wpars[,1,i], 
-								beta = wpars[,2,i], delta = wpars[,3,i], 
+						cfinv(z = zz, f = nigmvcf,
+								step = fft.step, alpha = wpars[,1,i],
+								beta = wpars[,2,i], delta = wpars[,3,i],
 								mu = wpars[,4,i])
 					})
 			for(i in 1:n) nigpdf[,i] = xpdf[[i]]
 			rm(xpdf)
-		} else{	
+		} else{
 			for(i in 1:n){
-				nigpdf[,i] = cfinv(z = zz, f = nigmvcf, step = fft.step, 
-						alpha = wpars[,1,i], beta = wpars[,2,i], 
+				nigpdf[,i] = cfinv(z = zz, f = nigmvcf, step = fft.step,
+						alpha = wpars[,1,i], beta = wpars[,2,i],
 						delta = wpars[,3,i], mu = wpars[,4,i])
 				if(debug) print(i)
 			}
@@ -1832,18 +1857,18 @@ setMethod("convolution", signature(object = "goGARCHroll"), .convolution.gogarch
 			clusterEvalQ(cluster, require(rmgarch))
 			clusterExport(cluster, c("fft.step", "fft.by", "wpars","cfinv","nigmvcf"), envir = environment())
 			xsol = parLapply(cluster, as.list(1:n), fun = function(i){
-						xmin = min(apply(cbind(wpars[,1,i], wpars[,2,i], wpars[,3,i], wpars[,4,i]), 1, 
-										FUN = function(x) rugarch:::qnig(0.0000001, 
-													alpha = x[1], beta = x[2], 
+						xmin = min(apply(cbind(wpars[,1,i], wpars[,2,i], wpars[,3,i], wpars[,4,i]), 1,
+										FUN = function(x) rugarch:::qnig(0.0000001,
+													alpha = x[1], beta = x[2],
 													delta = x[3], mu = x[4])))
-						xmax = max(apply(cbind(wpars[,1,i], wpars[,2,i], wpars[,3,i], wpars[,4,i]), 1, 
-										FUN = function(x) rugarch:::qnig(1-0.0000001, 
-													alpha = x[1], beta = x[2], 
+						xmax = max(apply(cbind(wpars[,1,i], wpars[,2,i], wpars[,3,i], wpars[,4,i]), 1,
+										FUN = function(x) rugarch:::qnig(1-0.0000001,
+													alpha = x[1], beta = x[2],
 													delta = x[3], mu = x[4])))
 						zz = seq(xmin, xmax, by = fft.by)
-						ans = cfinv(z = zz, f = nigmvcf, 
-								step = fft.step, alpha = wpars[,1,i], 
-								beta = wpars[,2,i], delta = wpars[,3,i], 
+						ans = cfinv(z = zz, f = nigmvcf,
+								step = fft.step, alpha = wpars[,1,i],
+								beta = wpars[,2,i], delta = wpars[,3,i],
 								mu = wpars[,4,i])
 						sol = list(d = ans, support = c(xmin, xmax))
 						return(sol)
@@ -1854,15 +1879,15 @@ setMethod("convolution", signature(object = "goGARCHroll"), .convolution.gogarch
 			}
 		} else{
 			for(i in 1:n){
-				xmin = min(apply(cbind(wpars[,1,i], wpars[,2,i], wpars[,3,i], wpars[,4,i]), 1, 
-								FUN = function(x) rugarch:::qnig(0.0000001, alpha = x[1], 
+				xmin = min(apply(cbind(wpars[,1,i], wpars[,2,i], wpars[,3,i], wpars[,4,i]), 1,
+								FUN = function(x) rugarch:::qnig(0.0000001, alpha = x[1],
 											beta = x[2], delta = x[3], mu = x[4])))
-				xmax = max(apply(cbind(wpars[,1,i], wpars[,2,i], wpars[,3,i], wpars[,4,i]), 1, 
-								FUN = function(x) rugarch:::qnig(1-0.0000001, alpha = x[1], 
+				xmax = max(apply(cbind(wpars[,1,i], wpars[,2,i], wpars[,3,i], wpars[,4,i]), 1,
+								FUN = function(x) rugarch:::qnig(1-0.0000001, alpha = x[1],
 											beta = x[2], delta = x[3], mu = x[4])))
 				zz = seq(xmin, xmax, by = fft.by)
-				nigpdf[[i]] = cfinv(z = zz, f = nigmvcf, step = fft.step, 
-						alpha = wpars[,1,i], beta = wpars[,2,i], 
+				nigpdf[[i]] = cfinv(z = zz, f = nigmvcf, step = fft.step,
+						alpha = wpars[,1,i], beta = wpars[,2,i],
 						delta = wpars[,3,i], mu = wpars[,4,i])
 				support.user[i, ] = c(xmin, xmax)
 				if(debug) print(i)
@@ -1889,17 +1914,17 @@ setMethod("convolution", signature(object = "goGARCHroll"), .convolution.gogarch
 }
 
 
-.convolve.gh = function(ghpars, M2, M1, A, weights, fft.step = 0.001, fft.by = 0.0001, 
-		fft.support = c(-1, 1), support.method = c("user", "adaptive"), 
+.convolve.gh = function(ghpars, M2, M1, A, weights, fft.step = 0.001, fft.by = 0.0001,
+		fft.support = c(-1, 1), support.method = c("user", "adaptive"),
 		use.ff = TRUE, cluster = NULL, model, debug = 0)
 {
 	sol = list()
 	n = dim(M2)[3]
 	m = NCOL(A)
 	if(!is.matrix(weights)) weights = matrix(weights, ncol = NROW(A), nrow = n, byrow = TRUE)
-	if(NCOL(weights) != NROW(A)) 
+	if(NCOL(weights) != NROW(A))
 		stop("\nconvolution-->error: wrong no. of columns for weights matrix.", call. = FALSE)
-	if(NROW(weights) != n) 
+	if(NROW(weights) != n)
 		stop("\nconvolution-->error: wrong no. of rows for weights matrix.", call. = FALSE)
 	# The weighting vector for the distribution
 	w.hat = matrix(NA, ncol = m, nrow = n)
@@ -1915,16 +1940,16 @@ setMethod("convolution", signature(object = "goGARCHroll"), .convolution.gogarch
 	# for(i in 1:n)  port[i] = weights[i,]%*%Mu[i,] + weights[i,]%*%(t(A) %*% sqrt(Sigma[,,i]) %*% (zres[i,]))
 	# Mu[i,] + (A %*% dS %*% (zres[i,]))
 	wpars = array(data = NA, dim = c(m, 5, n))
-	
+
 	# Scaling of parameters (Blaesild proof)
 	for(j in 1:m){
 		tmp = matrix(ghpars[j,1:5], ncol = 5, nrow = n, byrow = TRUE)
-		tmp = tmp*cbind(1/abs(w.hat[1:n,j]), 1/w.hat[1:n,j], abs(w.hat[1:n,j]), w.hat[1:n,j], rep(1,n)) + 
+		tmp = tmp*cbind(1/abs(w.hat[1:n,j]), 1/w.hat[1:n,j], abs(w.hat[1:n,j]), w.hat[1:n,j], rep(1,n)) +
 				cbind(matrix(0, ncol = 3, nrow = n), M1[,j] * weights[,j], rep(0, n))
 		wpars[j,,] = as.array(t(tmp), dim = c(1, 5, n))
 	}
-	
-	
+
+
 	if( support.method == "user" ){
 		support.user = NULL
 		zz = seq(fft.support[1], fft.support[2], by = fft.by)
@@ -1936,45 +1961,45 @@ setMethod("convolution", signature(object = "goGARCHroll"), .convolution.gogarch
 		}
 		if( !is.null(cluster) ){
 			clusterEvalQ(cluster, require(rmgarch))
-			clusterExport(cluster, c("zz", "fft.step", "wpars","cfinv","ghypmvcf"), 
+			clusterExport(cluster, c("zz", "fft.step", "wpars","cfinv","ghypmvcf"),
 					envir = environment())
 			xpdf = parLapply(cluster, 1:n, fun = function(i){
-						cfinv(z = zz, f = ghypmvcf, 
-								step = fft.step, lambda = wpars[,5,i], 
-								alpha = wpars[,1,i], beta = wpars[,2,i], 
+						cfinv(z = zz, f = ghypmvcf,
+								step = fft.step, lambda = wpars[,5,i],
+								alpha = wpars[,1,i], beta = wpars[,2,i],
 								delta = wpars[,3,i], mu = wpars[,4,i])
 					})
 			for(i in 1:n) ghpdf[,i] = xpdf[[i]]
 			rm(xpdf)
 		} else{
 			for(i in 1:n){
-				ghpdf[,i] = cfinv(z = zz, f = ghypmvcf, step = fft.step, lambda = wpars[,5,i], 
+				ghpdf[,i] = cfinv(z = zz, f = ghypmvcf, step = fft.step, lambda = wpars[,5,i],
 						alpha = wpars[,1,i], beta = wpars[,2,i], delta = wpars[,3,i], mu = wpars[,4,i])
 				if(debug) print(i)
 			}
-		}	
+		}
 	} else{
 		ghpdf = vector(mode = "list", length = n)
 		support.user = matrix(NA, ncol = 2, nrow = n)
 		if( !is.null(cluster) ){
 			clusterEvalQ(cluster, require(rmgarch))
-			clusterExport(cluster, c("zz", "fft.step", "fft.by", 
+			clusterExport(cluster, c("zz", "fft.step", "fft.by",
 							"wpars","cfinv","ghypmvcf"), envir = environment())
 			xsol = parLapply(cluster, as.list(1:n), fun = function(i){
-						xmin = min(apply(cbind(wpars[,1,i], wpars[,2,i], wpars[,3,i], wpars[,4,i], wpars[,5,i]), 1, 
-										FUN = function(x) rugarch:::qgh(0.0000001, 
-													alpha = x[1], beta = x[2], 
-													delta = x[3], mu = x[4], 
+						xmin = min(apply(cbind(wpars[,1,i], wpars[,2,i], wpars[,3,i], wpars[,4,i], wpars[,5,i]), 1,
+										FUN = function(x) rugarch:::qgh(0.0000001,
+													alpha = x[1], beta = x[2],
+													delta = x[3], mu = x[4],
 													lambda = x[5])))
-						xmax = max(apply(cbind(wpars[,1,i], wpars[,2,i], wpars[,3,i], wpars[,4,i], wpars[,5,i]), 1, 
-										FUN = function(x) rugarch:::qgh(1-0.0000001, 
-													alpha = x[1], beta = x[2], 
-													delta = x[3], mu = x[4], 
+						xmax = max(apply(cbind(wpars[,1,i], wpars[,2,i], wpars[,3,i], wpars[,4,i], wpars[,5,i]), 1,
+										FUN = function(x) rugarch:::qgh(1-0.0000001,
+													alpha = x[1], beta = x[2],
+													delta = x[3], mu = x[4],
 													lambda = x[5])))
 						zz = seq(xmin, xmax, by = fft.by)
-						ans = cfinv(z = zz, f = ghypmvcf, 
-								step = fft.step, lambda = wpars[,5,i], 
-								alpha = wpars[,1,i], beta = wpars[,2,i], 
+						ans = cfinv(z = zz, f = ghypmvcf,
+								step = fft.step, lambda = wpars[,5,i],
+								alpha = wpars[,1,i], beta = wpars[,2,i],
 								delta = wpars[,3,i], mu = wpars[,4,i])
 							sol = list(d = ans, support = c(xmin, xmax))
 							return(sol)
@@ -1985,17 +2010,17 @@ setMethod("convolution", signature(object = "goGARCHroll"), .convolution.gogarch
 			}
 		} else{
 			for(i in 1:n){
-				xmin = min(apply(cbind(wpars[,1,i], wpars[,2,i], wpars[,3,i], wpars[,4,i], wpars[,5,i]), 1, 
-								FUN = function(x) rugarch:::qgh(0.0000001, 
-											alpha = x[1], beta = x[2], delta = x[3], 
+				xmin = min(apply(cbind(wpars[,1,i], wpars[,2,i], wpars[,3,i], wpars[,4,i], wpars[,5,i]), 1,
+								FUN = function(x) rugarch:::qgh(0.0000001,
+											alpha = x[1], beta = x[2], delta = x[3],
 											mu = x[4], lambda = x[5])))
-				xmax = max(apply(cbind(wpars[,1,i], wpars[,2,i], wpars[,3,i], wpars[,4,i], wpars[,5,i]), 1, 
-								FUN = function(x) rugarch:::qgh(1-0.0000001, 
-											alpha = x[1], beta = x[2], delta = x[3], 
+				xmax = max(apply(cbind(wpars[,1,i], wpars[,2,i], wpars[,3,i], wpars[,4,i], wpars[,5,i]), 1,
+								FUN = function(x) rugarch:::qgh(1-0.0000001,
+											alpha = x[1], beta = x[2], delta = x[3],
 											mu = x[4], lambda = x[5])))
 				zz = seq(xmin, xmax, by = fft.by)
-				ghpdf[[i]] = cfinv(z = zz, f = ghypmvcf, step = fft.step, 
-						lambda = wpars[,5,i], alpha = wpars[,1,i], 
+				ghpdf[[i]] = cfinv(z = zz, f = ghypmvcf, step = fft.step,
+						lambda = wpars[,5,i], alpha = wpars[,1,i],
 						beta = wpars[,2,i], delta = wpars[,3,i], mu = wpars[,4,i])
 				support.user[i, ] = c(xmin, xmax)
 				if(debug) print(i)
@@ -2027,7 +2052,7 @@ setMethod("convolution", signature(object = "goGARCHroll"), .convolution.gogarch
 	if(!is.matrix(weights)) weights = matrix(weights, ncol = NROW(A), nrow = n, byrow = TRUE)
 	if(NCOL(weights) != NROW(A)) stop("\nconvolution-->error: wrong no. of columns for weights matrix.", call. = FALSE)
 	if(NROW(weights) != n) stop("\nconvolution-->error: wrong no. of rows for weights matrix.", call. = FALSE)
-	
+
 	# A matrix with the weighte portfolio sigma and mu
 	normpdf = matrix(NA, ncol = 2, nrow = n)
 	for(i in 1:n){
@@ -2082,13 +2107,13 @@ nisurface = function(object, ...)
 	UseMethod("nisurface")
 }
 
-.newsimpact.gogarch = function(object, type = "cov", pair = c(1,2), factor = c(1,2), 
+.newsimpact.gogarch = function(object, type = "cov", pair = c(1,2), factor = c(1,2),
 		plot = TRUE, plot.type = c("surface", "contour"))
 {
 	ans = switch(type,
-			cov = .newsimpact.gogarch.cov(object = object, pair = pair, 
+			cov = .newsimpact.gogarch.cov(object = object, pair = pair,
 					factor = factor, plot = plot, type = plot.type),
-			cor = .newsimpact.gogarch.cor(object = object, pair = pair, 
+			cor = .newsimpact.gogarch.cor(object = object, pair = pair,
 					factor = factor, plot = plot, type = plot.type)
 			)
 	return(ans)
@@ -2097,7 +2122,7 @@ nisurface = function(object, ...)
 setMethod("nisurface", signature(object = "goGARCHfit"), .newsimpact.gogarch)
 setMethod("nisurface", signature(object = "goGARCHfilter"), .newsimpact.gogarch)
 
-.newsimpact.gogarch.cov = function(object, pair = c(1,2), factor = c(1,2), 
+.newsimpact.gogarch.cov = function(object, pair = c(1,2), factor = c(1,2),
 		plot = TRUE, type = c("surface", "contour"))
 {
 	if(is(object, "goGARCHfit")){
@@ -2117,9 +2142,9 @@ setMethod("nisurface", signature(object = "goGARCHfilter"), .newsimpact.gogarch)
 	for(i in 1:m){
 		specx = ugarchspec(mean.model = list(include.mean = FALSE, armaOrder = c(0,0)),
 				variance.model = list(model = object@model$umodel$vmodel,
-						submodel = object@model$umodel$vsubmodel, 
+						submodel = object@model$umodel$vsubmodel,
 						variance.targeting = object@model$umodel$variance.targeting),
-				distribution.model = object@model$umodel$distribution, 
+				distribution.model = object@model$umodel$distribution,
 				fixed.pars = as.list(garchcoef[,i]))
 		filt[[i]] = ugarchfilter(specx, data = Y[,i], out.sample = object@model$modeldata$n.start)
 	}
@@ -2138,7 +2163,7 @@ setMethod("nisurface", signature(object = "goGARCHfilter"), .newsimpact.gogarch)
 	rownames(s2) = round(as.numeric(zeps),4)
 	np = 1:m
 	for(j in 1:N){
-		for(i in 1:N){	
+		for(i in 1:N){
 			sigmas = s2[zr,]
 			sigmas1 = as.numeric(s2[j, factor[1]])
 			sigmas2 = as.numeric(s2[i, factor[2]])
@@ -2156,14 +2181,14 @@ setMethod("nisurface", signature(object = "goGARCHfilter"), .newsimpact.gogarch)
 					z = ni,  col = x1, theta = 45, phi = 25, expand = 0.5,
 					ltheta = 120, shade = 0.75, ticktype = "detailed", xlab = paste("shock[f", factor[1], "]",sep=""),
 					ylab = paste("shock[f", factor[2], "]",sep=""), zlab = "cov",
-					cex.axis = 0.7,  cex.main = 0.8, main = paste("GOGARCH News Impact Covariance Surface\n", 
+					cex.axis = 0.7,  cex.main = 0.8, main = paste("GOGARCH News Impact Covariance Surface\n",
 							cnames[pair[1]], "-", cnames[pair[2]], sep = ""))
 		} else{
 			tcol <- terrain.colors(12)
 			contour(  x = zeps,
 					y = zeps,
 					z = ni,  col = tcol[2], lty = "solid",  cex.axis = 0.7,  cex.main = 0.8,
-					main = paste("GOGARCH News Impact Covariance Contour\n", 
+					main = paste("GOGARCH News Impact Covariance Contour\n",
 							cnames[pair[1]], "-", cnames[pair[2]], sep = ""))
 		}
 	}
@@ -2171,7 +2196,7 @@ setMethod("nisurface", signature(object = "goGARCHfilter"), .newsimpact.gogarch)
 }
 
 
-.newsimpact.gogarch.cor = function(object, pair = c(1,2), factor = c(1,2), 
+.newsimpact.gogarch.cor = function(object, pair = c(1,2), factor = c(1,2),
 		plot = TRUE, type = c("surface", "contour"))
 {
 	if(is(object, "goGARCHfit")){
@@ -2190,13 +2215,13 @@ setMethod("nisurface", signature(object = "goGARCHfilter"), .newsimpact.gogarch)
 	for(i in 1:m){
 		specx = ugarchspec(mean.model = list(include.mean = FALSE, armaOrder = c(0,0)),
 				variance.model = list(model = object@model$umodel$vmodel,
-						submodel = object@model$umodel$vsubmodel, 
+						submodel = object@model$umodel$vsubmodel,
 						variance.targeting = object@model$umodel$variance.targeting),
-				distribution.model = object@model$umodel$distribution, 
+				distribution.model = object@model$umodel$distribution,
 				fixed.pars = as.list(garchcoef[,i]))
 		filt[[i]] = ugarchfilter(specx, data = Y[,i], out.sample = object@model$modeldata$n.start)
 	}
-	nilist[[1]] = newsimpact(z = NULL, object = filt[[1]])	
+	nilist[[1]] = newsimpact(z = NULL, object = filt[[1]])
 	zeps = nilist[[1]]$zx
 	for(i in 2:m) nilist[[i]]  = newsimpact(z = zeps, object = filt[[i]])
 	sigmas = sapply(nilist, FUN = function(x) x$zy)
@@ -2208,7 +2233,7 @@ setMethod("nisurface", signature(object = "goGARCHfilter"), .newsimpact.gogarch)
 	rownames(s2) = round(as.numeric(zeps),4)
 	np = 1:m
 	for(j in 1:N){
-		for(i in 1:N){	
+		for(i in 1:N){
 			sigmas = s2[zr,]
 			sigmas1 = as.numeric(s2[j, factor[1]])
 			sigmas2 = as.numeric(s2[i, factor[2]])
@@ -2226,14 +2251,14 @@ setMethod("nisurface", signature(object = "goGARCHfilter"), .newsimpact.gogarch)
 					z = ni,  col = x1, theta = 45, phi = 25, expand = 0.5,
 					ltheta = 120, shade = 0.75, ticktype = "detailed", xlab = paste("shock[f", factor[1], "]",sep=""),
 					ylab = paste("shock[f", factor[2], "]",sep=""), zlab = "cor",
-					cex.axis = 0.7,  cex.main = 0.8, main = paste("GOGARCH News Impact Correlation Surface\n", 
+					cex.axis = 0.7,  cex.main = 0.8, main = paste("GOGARCH News Impact Correlation Surface\n",
 							cnames[pair[1]], "-", cnames[pair[2]], sep = ""))
 		} else{
 			tcol <- terrain.colors(12)
 			contour(  x = zeps,
 					y = zeps,
 					z = ni,  col = tcol[2], lty = "solid",  cex.axis = 0.7,  cex.main = 0.8,
-					main = paste("GOGARCH News Impact Correlation Contour\n", 
+					main = paste("GOGARCH News Impact Correlation Contour\n",
 							cnames[pair[1]], "-", cnames[pair[2]], sep = ""))
 		}
 	}
@@ -2335,7 +2360,7 @@ betacoskew = function(object, ...)
 		k = 1
 	} else{
 		idx1 = seq(1, n, by = 50)
-		if(idx1[length(idx1)]!=n) idx1 = c(idx1, n)			
+		if(idx1[length(idx1)]!=n) idx1 = c(idx1, n)
 		idx1 = idx1[-1]
 		idx2 = c(1, idx1[-length(idx1)]+1)
 		idx = cbind(idx2, idx1)
@@ -2383,7 +2408,7 @@ setMethod("betacoskew", signature(object = "goGARCHfilter"), .betacoskew.fit)
 			k = 1
 		} else{
 			idx1 = seq(1, n, by = 50)
-			if(idx1[length(idx1)]!=n) idx1 = c(idx1, n)			
+			if(idx1[length(idx1)]!=n) idx1 = c(idx1, n)
 			idx1 = idx1[-1]
 			idx2 = c(1, idx1[-length(idx1)]+1)
 			idx = cbind(idx2, idx1)
@@ -2456,14 +2481,14 @@ betacokurt = function(object, ...)
 		k = 1
 	} else{
 		idx1 = seq(1, n, by = 50)
-		if(idx1[length(idx1)]!=n) idx1 = c(idx1, n)			
+		if(idx1[length(idx1)]!=n) idx1 = c(idx1, n)
 		idx1 = idx1[-1]
 		idx2 = c(1, idx1[-length(idx1)]+1)
 		idx = cbind(idx2, idx1)
 		k = NROW(idx)
 	}
 	b = rep(0, n)
-	
+
 	if(!is.null(cluster)){
 		clusterExport(cluster, c("object","idx","asset","weights"), envir = environment())
 		clusterEvalQ(cluster, loadNamespace('rmgarch'))
@@ -2506,7 +2531,7 @@ setMethod("betacokurt", signature(object = "goGARCHfilter"), .betacokurt.fit)
 			k = 1
 		} else{
 			idx1 = seq(1, n, by = 50)
-			if(idx1[length(idx1)]!=n) idx1 = c(idx1, n)			
+			if(idx1[length(idx1)]!=n) idx1 = c(idx1, n)
 			idx1 = idx1[-1]
 			idx2 = c(1, idx1[-length(idx1)]+1)
 			idx = cbind(idx2, idx1)
@@ -2555,7 +2580,7 @@ setMethod("betacokurt", signature(object = "goGARCHfilter"), .betacokurt.fit)
 setMethod("betacokurt", signature(object = "goGARCHforecast"), .betacokurt.forecast)
 
 #-----------------------------------------------------------------------------
-.abind = function (x, y) 
+.abind = function (x, y)
 {
 	m  = dim(x)[1]
 	mm = dim(x)[2]

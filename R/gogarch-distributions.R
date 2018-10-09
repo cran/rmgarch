@@ -428,20 +428,22 @@ ghypmvcf = function(z, lambda, alpha, beta, delta, mu)
 	idx = vector(mode="list", length = unique_pairs)
 	prs = t(combn(n, 2))
 	prs = cbind(prs[,2], prs[,1], prs[,2] - prs[,1])
-	prs = prs[order(prs[,1]-prs[,2]), ]
+	prs = prs[order(prs[,1]-prs[,2]), ,drop=FALSE]
 	colnames(prs) = c("ij","kl","d")
 	ix = n+2
 	# first pair is always : {2,1}
 	idx[[1]] = cumsum(c(ix, (n-1)*n, (n-1), (n+1)*(n-1)^2, (n-1), (n-1)*n))
-	for(i in 2:unique_pairs){
-		d = prs[i,3]
-		if(d == prs[i-1,3]){
-			i1 = idx[[i-1]][1]+n^3+n^2+n+1
-		} else{
-			i1 = ix+n+1
-			ix = i1
+	if(unique_pairs>1){
+		for(i in 2:unique_pairs){
+			d = prs[i,3]
+			if(d == prs[i-1,3]){
+				i1 = idx[[i-1]][1]+n^3+n^2+n+1
+			} else{
+				i1 = ix+n+1
+				ix = i1
+			}
+			idx[[i]] = cumsum(c(i1, d*(n-1)*n, d*(n-1), d*(n+1)*(n-1)^2, d*(n-1), d*(n-1)*n))
 		}
-		idx[[i]] = cumsum(c(i1, d*(n-1)*n, d*(n-1), d*(n+1)*(n-1)^2, d*(n-1), d*(n-1)*n))
 	}
 	return(list(index = idx, pairs = prs))
 }
