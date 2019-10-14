@@ -289,7 +289,7 @@ varxsim = function(X, Bcoef, p, n.sim, n.start, prereturns, resids, mexsimdata)
 		mxn = ncol(mexsimdata)
 	} else{
 		mxn = 0
-		Bcoef = Bcoef[,1:(m*p+1)]
+		Bcoef = Bcoef[,1:(m*p+1*constant)]
 	}
 	dmat2 = NULL
 	if( is.null(prereturns) ){
