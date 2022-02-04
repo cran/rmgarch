@@ -1,6 +1,6 @@
 /*################################################################################
 ##
-##   R package rmgarch by Alexios Ghalanos Copyright (C) 2009-2013
+##   R package rmgarch by Alexios Galanos Copyright (C) 2009-2013
 ##   This file is part of the R package rmgarch.
 ##
 ##   The R package rmgarch is free software: you can redistribute it and/or modify
@@ -44,11 +44,11 @@ SEXP radicalrot(SEXP X, SEXP idx)
 			rot(1,1) = cos(theta);
 			rotp = rot * AX;
 			vals = rotp.row(0);
-			vals = arma::sort(vals, "ascend");
+			vals = arma::sort(vals);
 			tmp = arma::log(vals.cols(m,mx-1) - vals.cols(0,mx-m-1));
 			margtheta(0) = arma::as_scalar(arma::accu(tmp));
 			vals = rotp.row(1);
-			vals = arma::sort(vals, "ascend");
+			vals = arma::sort(vals);
 			tmp = arma::log(vals.cols(m,mx-1) - vals.cols(0,mx-m-1));
 			margtheta(1) = arma::as_scalar(arma::accu(tmp));
 			ent(i) = arma::as_scalar(arma::accu(margtheta));
