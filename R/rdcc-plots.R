@@ -312,15 +312,22 @@
 			mvt = "std")
 	q01 = rugarch::qdist(distribution = dm, p = 0.01, mu = dport[,1], sigma = dport[,2], lambda = -0.5,
 						skew = dport[,3], shape = dport[,4])
+	q05 = rugarch::qdist(distribution = dm, p = 0.05, mu = dport[,1], sigma = dport[,2], lambda = -0.5,
+						skew = dport[,3], shape = dport[,4])
+	q95 = rugarch::qdist(distribution = dm, p = 0.95, mu = dport[,1], sigma = dport[,2], lambda = -0.5,
+						skew = dport[,3], shape = dport[,4])
 	q99 = rugarch::qdist(distribution = dm, p = 0.99, mu = dport[,1], sigma = dport[,2], lambda = -0.5,
 						skew = dport[,3], shape = dport[,4])
-	plot(zoo(port, xDates), col = "steelblue", ylab = "", xlab = "",
-			main = "EW Portfolio with with 1% VaR Limits \n(based on Conditional Weighted Density)",
+	plot(zoo(port, xDates), col = "gray74", ylab = "", xlab = "",
+			main = "Portfolio with 1% and 5% VaR limits",
 			cex.main = 0.8)
-	lines(zoo(q01, xDates), col = "tomato1")
+	lines(zoo(q01, xDates), col = "black")
+	lines(zoo(q05, xDates), col = "red")
+	lines(zoo(q95, xDates), col = "blue")
 	lines(zoo(q99,xDates), col = "green")
 	mtext(paste("rmgarch  : DCC model fit"), side = 4, adj = 0, padj=0, col = "gray", cex = 0.4)
-	abline(h = 0, col = "grey", lty = 3)
+	abline(h = 0, col = "gray88", lty = 3)
+
 	grid()
 	invisible()
 }
