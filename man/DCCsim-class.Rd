@@ -6,7 +6,7 @@
 \alias{rcov,DCCsim-method}
 \alias{sigma,DCCsim-method}
 \alias{show,DCCsim-method}
-\title{class: DCC Forecast Class}
+\title{class: DCC Simulation Class}
 \description{
 The class is returned by calling the function \code{\link{dccsim}}.
 }
@@ -19,11 +19,10 @@ The class is returned by calling the function \code{\link{dccsim}}.
   }
 }
 \section{Extends}{
-Class \code{"\linkS4class{mGARCHsim}"}, directly.
-Class \code{"\linkS4class{GARCHsim}"}, by class "mGARCHsim", distance 2.
-Class \code{"\linkS4class{rGARCH}"}, by class "mGARCHsim", distance 3.
+Class \code{mGARCHsim}, directly.\\
+Class \code{GARCHsim} object from the \pkg{rugarch} package, by class \code{mGARCHsim}, distance 2.\\
+Class \code{rGARCH} object from the \pkg{rugarch} package, by class \code{mGARCHsim}, distance 3.
 }
-
 \section{Methods}{
   \describe{
     \item{fitted}{\code{signature(object = "DCCsim")}:

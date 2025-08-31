@@ -1,9 +1,9 @@
 Package: rmgarch
 Type: Package
 Title: Multivariate GARCH Models
-Version: 1.3-9
-Date: 2022-02-03
-Author: Alexios Galanos <alexios@4dscape.com>
+Version: 1.4-2
+Date: 2025-08-31
+Authors@R: c(person("Alexios", "Galanos", role = c("aut", "cre","cph"), email = "alexios@4dscape.com", comment = c(ORCID = "0009-0000-9308-0457")))
 Maintainer: Alexios Galanos <alexios@4dscape.com>
 Depends: R (>= 3.0.2), methods, rugarch (>= 1.4-7), parallel
 LinkingTo: Rcpp (>= 0.10.6), RcppArmadillo (>= 0.2.34)
@@ -21,9 +21,11 @@ Collate: rmgarch-extrafun.R rmgarch-var.R rmgarch-functions.R
         copula-transformations.R copula-main.R copula-postestimation.R
         copula-methods.R rmgarch-tests.R rmgarch-scenario.R zzz.R
 LazyLoad: yes
-URL: http://www.unstarched.net, https://github.com/alexiosg/rmgarch
+URL: https://github.com/alexiosg/rmgarch
 License: GPL-3
 NeedsCompilation: yes
-Packaged: 2022-02-04 22:51:09 UTC; alexios
+Packaged: 2025-08-31 18:17:47 UTC; alexios
+Author: Alexios Galanos [aut, cre, cph] (ORCID:
+    <https://orcid.org/0009-0000-9308-0457>)
 Repository: CRAN
-Date/Publication: 2022-02-05 00:30:06 UTC
+Date/Publication: 2025-08-31 19:00:02 UTC

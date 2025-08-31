@@ -22,11 +22,10 @@ The class is returned by calling the function \code{\link{dccforecast}}.
   }
 }
 \section{Extends}{
-Class \code{"\linkS4class{mGARCHforecast}"}, directly.
-Class \code{"\linkS4class{GARCHforecast}"}, by class "mGARCHforecast", distance 2.
-Class \code{"\linkS4class{rGARCH}"}, by class "mGARCHforecast", distance 3.
+Class \code{mGARCHforecast}, directly.\\
+Class \code{GARCHforecast} object from the \pkg{rugarch} package, by class \code{mGARCHforecast}, distance 2.\\
+Class \code{rGARCH} object from the \pkg{rugarch} package, by class \code{mGARCHforecast}, distance 3.
 }
-
 \section{Methods}{
   \describe{
   	\item{rshape}{\code{signature(object = "DCCforecast")}:
@@ -35,22 +34,22 @@ Class \code{"\linkS4class{rGARCH}"}, by class "mGARCHforecast", distance 3.
     The multivariate distribution skew parameter(s). }
     \item{fitted}{\code{signature(object = "DCCforecast")}:
     The conditional mean forecast array of dimensions n.ahead x n.assets
-    by (n.roll+1). The thirds dimension of the array has the T+0 index label.}
+    by (n.roll+1). The third dimension of the array has the T+0 index label.}
     \item{sigma}{\code{signature(object = "DCCforecast")}:
     The conditional sigma forecast array of dimensions n.ahead x n.assets
-    by (n.roll+1). The thirds dimension of the array has the T+0 index label.}
+    by (n.roll+1). The third dimension of the array has the T+0 index label.}
     \item{plot}{\code{signature(x = "DCCforecast", y = "missing")}:
     Plot method, given additional arguments \sQuote{series} and \sQuote{which}.}
     \item{rcor}{\code{signature(object = "DCCforecast")}:
     The forecast dynamic conditional correlation list of arrays of length
     (n.roll+1), with each array of dimensions n.assets x n.assets x n.ahead.
-    The method takes on one additional argument \sQuote{type} (either \dQuote{R}
+    The method takes one additional argument \sQuote{type} (either \dQuote{R}
     for the correlation else will return the DCC Q matrix). A further argument
     \sQuote{output} allows to switch between \dQuote{array}
     and \dQuote{matrix} returned object.
     }
     \item{rcov}{\code{signature(object = "DCCforecast")}:
-     The forecast dynamic conditional correlation list of arrays of length
+     The forecast dynamic conditional covariance list of arrays of length
     (n.roll+1), with each array of dimensions n.assets x n.assets x n.ahead.
     A further argument \sQuote{output} allows to switch between \dQuote{array}
     and \dQuote{matrix} returned object.

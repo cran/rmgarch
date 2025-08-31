@@ -2,12 +2,11 @@
 \docType{class}
 \alias{mGARCHforecast-class}
 \title{Class: Multivariate GARCH Forecast Class}
-\description{High Level multivariate GARCH forecast class.}
-\section{Objects from the Class}{A virtual Class: No objects may be created from 
-it.}
+\description{High-level multivariate GARCH forecast class.}
+\section{Objects from the Class}{A virtual class: no objects may be created from it.}
 \section{Extends}{
-Class \code{"\linkS4class{GARCHforecast}"}, directly.
-Class \code{"\linkS4class{rGARCH}"}, by class "GARCHforecast", distance 2.
+Class \code{GARCHforecast} object from the \pkg{rugarch} package, directly.\\
+Class \code{rGARCH} object from the \pkg{rugarch} package, by class \code{GARCHforecast}, distance 2.
 }
 \section{Methods}{
 No methods defined with class "mGARCHforecast" in the signature.
