@@ -1,5 +1,5 @@
-d7d645868a50f94503f9fd3ab3934297 *ChangeLog
-cc85c312afcbb022cd396b2ef34eee70 *DESCRIPTION
+15311307c4c29eabf81ffee6cebc4da4 *ChangeLog
+397089787ff1fddf7d3399a38ebb9a5b *DESCRIPTION
 0d66ac76a272694da38dae257d35758b *NAMESPACE
 8f8a9830325239ae97723c4bb0aec1ea *R/copula-classes.R
 f64fb5b06f7ed4716acf614f897e65c4 *R/copula-distributions.R
@@ -34,11 +34,11 @@ a0357722bd2c868892bb8504bb6279b5 *R/rmgarch-mmean.R
 6ad54ca36ec5bcbd0b52ee1cba97f9f7 *R/rmgarch-tests.R
 ca1a4600e8304ab2d4ccbe9641925c69 *R/rmgarch-var.R
 4358dba1f8442dd9bf6bbff527458555 *R/zzz.R
-f1007f2283b0017a6599ca6a8884eff2 *build/vignette.rds
+419223d58963af850f33c758cdcbdb7c *build/vignette.rds
 420ec2fc9209af62681c5c0738efb297 *data/dji30retw.rda
 3eb7a27ab91059e8a3f578b5af8abe9e *inst/CITATION
-624b2d82c1debe71ed3ecc4030f87c34 *inst/doc/The_rmgarch_models.Rnw
-7ec48d39af24cedbc500a11f6d789a05 *inst/doc/The_rmgarch_models.pdf
+dd4715c777be809628b134b89084470f *inst/doc/The_rmgarch_models.Rnw
+7b0f6f154b06422f5d94b08507641382 *inst/doc/The_rmgarch_models.pdf
 40adaa0ce749c403272ccf3b040a792b *inst/rmgarch.tests/rmgarch.test1.R
 4a32ea8c85e2c4c903c53dd71c91feb4 *inst/rmgarch.tests/rmgarch.test2.R
 54429fc7b1f5e9802f0bd3764f32ee59 *inst/rmgarch.tests/rmgarch.test3.R
@@ -99,8 +99,8 @@ ccb93da2cc405f2bcb270cadee29c2d5 *man/mGARCHroll-class.Rd
 bfe9f7ba2be51b09bc5f6516e6f0077a *man/rmgarch-package.Rd
 48989b57774c2db2033f5fa1dd5557ee *man/varxfit.Rd
 26e649e4fce8cd9eedb495f3fb19c6d9 *man/wmargin.Rd
-38394f3734100525a670e01ce2231677 *src/Makevars
-15b9696d8f39701559354621b9c19758 *src/Makevars.win
+a5a8d424f5c0b3bbebd05a656d4a4bd9 *src/Makevars
+a5a8d424f5c0b3bbebd05a656d4a4bd9 *src/Makevars.win
 ba0b6238b3fc8ec25dc47f35213897cb *src/copulas.cpp
 ca3f2814341592291073c1af12d22b40 *src/copulas.h
 4b2468062455ecc02142b5f9f371969c *src/gogarch.cpp
@@ -110,8 +110,8 @@ ca3f2814341592291073c1af12d22b40 *src/copulas.h
 3fa06dec7f6be85a987d66ca33af841c *src/init.c
 f27eca14bce983aa47e0c35f2214cd71 *src/rdcc.cpp
 ac5573d63d5867f5f7b50c7b65d15f28 *src/rdcc.h
-90fbca28e2469be9b14ef02244f1722a *src/rmdist.cpp
-d082914dbb4a617cb5a4b5326c4e640d *src/rmdist.h
-624b2d82c1debe71ed3ecc4030f87c34 *vignettes/The_rmgarch_models.Rnw
-32fa3df0013da01ee959839a2c2dec06 *vignettes/rmgarch1.tex
-66d36088ab0a1115b18d9136c85dd527 *vignettes/rmgarchbib.bib
+b8b0e094fa61492857958d051f1447e3 *src/rmdist.cpp
+fbfe6a406210c0ffd72f1112a8ada931 *src/rmdist.h
+dd4715c777be809628b134b89084470f *vignettes/The_rmgarch_models.Rnw
+8e06cc40c7e394107aa92ce0819fa5b3 *vignettes/rmgarch1.tex
+a1b10bf5a2d8ae38a2bd46e48b716540 *vignettes/rmgarchbib.bib

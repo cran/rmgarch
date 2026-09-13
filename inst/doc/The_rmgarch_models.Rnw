@@ -153,8 +153,9 @@
 \newcommand{\E}{\ensuremath{\rm E}}
 \bibliographystyle{plainnat}
 \begin{document}
+\SweaveOpts{concordance=TRUE}
 \title{The rmgarch models: Background and properties.\\
-(Version 1.3-0)}
+(Version 1.4-3)}
 \author{Alexios Galanos}
 \date{\today}
 \maketitle
